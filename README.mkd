@@ -1,0 +1,71 @@
+rentmybike
+===
+
+Reference implementation of [Balanced](https://www.balancedpayments.com) for
+collecting and charging credit cards, and collecting and crediting bank accounts.
+
+Uses jQuery, [Less](http://lesscss.org/), Python (>= 2.7), SQLite,
+[WTForms](http://wtforms.simplecodes.com/), and
+[Bootstrap](http://twitter.github.com/bootstrap/).
+
+If you'd like to deploy signup for a [Heroku](http://www.heroku.com/signup)
+account if you dont already have one and install [Toolbelt]
+(https://toolbelt.heroku.com/).
+
+Install
+---
+
+    $ git clone https://github.com/balanced/rentmybikes.git
+    $ cd rentmybikes
+    $ mkvirtualenv rentmybike
+    $ pip install -r requirements.txt
+
+
+Configure
+---
+
+Edit the following in `rentmybike/settings/default.py`:
+
+* Set `BALANCED_SECRET` to your secret key. Get one from [Balanced] (https://www.balancedpayments.com/marketplaces/start) if you dont have one.
+* Set `username`, `password` and `host` of `DB_URI` for your database.
+* Set `MAIL_SERVER`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_PORT` for your mail server.
+
+Optionally:
+
+* Set `DOMAIN_URI` to the domain where rentmybike will be deployed.
+
+
+Here is an example:
+
+```python
+DB_URI = 'postgresql://username:password@server/database'
+
+BALANCED_SECRET = 'supersecret'
+
+MAIL_DEBUG = True
+MAIL_SERVER = 'smtp.mailgun.org'
+MAIL_USERNAME = 'postmaster@mailgun.org'
+MAIL_PASSWORD = 'supersecret'
+MAIL_PORT = 587
+
+DOMAIN_URI = 'http://myapp.herokuapp.com'
+```
+
+Run
+---
+
+    $ foreman start
+
+or if you dont have [Toolbelt] (https://toolbelt.heroku.com/)
+
+    $ ./run.py
+
+
+Deploy
+---
+    $ cd rentmybikes
+    $ heroku create
+    $ git push origin heroku
+    $ heroku ps:scale web=1
+    $ heroku open
+
