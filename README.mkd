@@ -1,6 +1,8 @@
 rentmybike
 ===
 
+[![Build Status](https://secure.travis-ci.org/balanced/rentmybikes.png?branch=master)](http://travis-ci.org/balanced/rentmybikes)
+
 Reference implementation of [Balanced](https://www.balancedpayments.com) for
 collecting and charging credit cards, and collecting and crediting bank accounts.
 
