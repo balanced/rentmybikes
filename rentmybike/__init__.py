@@ -13,7 +13,10 @@ config.from_object('rentmybike.settings.default')
 if os.getenv('RENTMYBIKE_ENV'):
     config.from_object('rentmybike.settings.' + os.getenv('RENTMYBIKE_ENV'))
 else:
-    config.from_object('rentmybike.settings.custom')
+    try:
+        config.from_object('rentmybike.settings.custom')
+    except ImportError:
+        pass
 
 # app
 

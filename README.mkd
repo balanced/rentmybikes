@@ -34,7 +34,6 @@ Optionally:
 
 * Set `DOMAIN_URI` to the domain where rentmybike will be deployed.
 
-
 Here is an example:
 
 ```python
