@@ -12,11 +12,6 @@ config = Config(None, Flask.default_config)
 config.from_object('rentmybike.settings.default')
 if os.getenv('RENTMYBIKE_ENV'):
     config.from_object('rentmybike.settings.' + os.getenv('RENTMYBIKE_ENV'))
-else:
-    try:
-        config.from_object('rentmybike.settings.custom')
-    except ImportError:
-        pass
 
 # app
 
