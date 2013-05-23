@@ -10,7 +10,7 @@ SUPPORT_EMAIL = os.environ['APP_SUPPORT_EMAIL']
 MAIL_FROM = ('Rent my Bike', SUPPORT_EMAIL)
 MAIL_SERVER = 'smtp.mailgun.org'
 MAIL_PORT = 587
-MAIL_SENDER = MAIL_FROM
+DEFAULT_MAIL_SENDER = MAIL_FROM
 
 DOMAIN_URI = 'http://www.rentmybike.co'
 GITHUB_URL = 'https://github.com/balanced/rentmybikes'

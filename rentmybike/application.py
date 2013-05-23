@@ -5,9 +5,9 @@ import traceback
 
 import balanced
 from flask import Flask, request, Response, session
-from flaskext import mail
+from flaskext.mail import Mail
 from sqlalchemy.exc import InterfaceError
-from werkzeug import BaseResponse
+from werkzeug.wrappers import BaseResponse
 
 from rentmybike import config
 from rentmybike.db import Session
@@ -36,7 +36,7 @@ class RentMyBike(Flask):
         self.before_request(self.inject_csrf_token)
         self.teardown_request(self.session_cleanup)
 
-        self.emailer = mail.Mail()
+        self.emailer = Mail()
         self.emailer.init_app(self)
 
         balanced.configure(self.config['BALANCED_SECRET'])

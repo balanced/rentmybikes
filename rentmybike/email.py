@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 from flask import current_app
-from flask.ext import mail
+from flaskext.mail import message
 
 from rentmybike import renderer
 
@@ -31,6 +31,6 @@ class EmailTemplateRenderer(object):
 def send_email(to, subject, template, **kwargs):
     renderer = EmailTemplateRenderer(template)
     content = renderer.render_email_template(**kwargs)
-    msg = mail.Message(subject, recipients=[to])
+    msg = message.Message(subject, recipients=[to])
     msg.html = content
     current_app.emailer.send(msg)

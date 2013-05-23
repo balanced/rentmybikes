@@ -38,6 +38,6 @@ MAIL_SERVER = 'smtp.mailgun.org'
 MAIL_USERNAME = 'user@mailgun.org'
 MAIL_PASSWORD = 'password'
 MAIL_PORT = 587
-MAIL_SENDER = MAIL_FROM
+DEFAULT_MAIL_SENDER = MAIL_FROM
 
 GITHUB_URL = 'https://github.com/me/rentmybikes'
