@@ -51,8 +51,8 @@
         if (!balanced.emailAddress.validate(emailAddress)) {
             addErrorToField($form, 'email_address');
         }
-        if (!balanced.card.isCardNumberValid(cardData.card_number)) {
-            addErrorToField($form, 'card_number');
+        if (!balanced.card.isCardNumberValid(cardData.number)) {
+            addErrorToField($form, 'number');
         }
         if (!balanced.card.isExpiryValid(cardData.expiration_month, cardData.expiration_year)) {
             addErrorToField($form, 'expiration_month');
@@ -69,7 +69,7 @@
     };
     var completePurchase = function (response) {
         var $form = $('form#purchase');
-        var sensitiveFields = ['card_number', 'expiration_month', 'expiration_year'];
+        var sensitiveFields = ['number', 'expiration_month', 'expiration_year'];
 
         hideProcessing();
         switch (response.status) {
@@ -78,11 +78,11 @@
                 //  IMPORTANT - remove sensitive data to remain PCI compliant
                 removeSensitiveFields($form, sensitiveFields);
                 $form.find('input').removeAttr('disabled');
-                $('<input type="hidden" name="card_uri" value="' + response.data.uri + '">').appendTo($form);
+                $('<input type="hidden" name="card_uri" value="' + response.data.href + '">').appendTo($form);
                 $form.unbind('submit', submitPurchase).submit();
                 break;
             case 400:
-                var fields = ['card_number', 'expiration_month', 'expiration_year', 'security_code'];
+                var fields = ['number', 'expiration_month', 'expiration_year', 'cvv'];
                 var found = false;
                 for (var i = 0; i < fields.length; i++) {
                     var isIn = response.error.description.indexOf(fields[i]) >= 0;
@@ -139,7 +139,7 @@
             addErrorToField($form, 'email_address');
         }
 
-        if (!merchantData.street_address) {
+        if (!merchantData.  street_address) {
             addErrorToField($form, 'street_address');
         }
 
@@ -253,7 +253,6 @@
     ctx.rentmybike = {
         init:function (options) {
             _options = options;
-            balanced.init(options.marketplaceUri);
             $('form#purchase').submit(submitPurchase);
             $('form#kyc').submit(submitKYC);
             $('[data-dismiss="alert"]').live('click', function (e) {

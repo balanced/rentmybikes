@@ -48,12 +48,12 @@ class TestBuyerFlow(SystemTestCase):
 
     def _card_payload(self):
         card = balanced.Card(
-            card_number='4111111111111111',
+            number='4111111111111111',
             expiration_month=12,
             expiration_year=2020,
-            security_code=123
+            cvv=123
         ).save()
-        return card.uri
+        return card.href
 
     def _verify_buyer_transactions(self, email_address):
         user = User.query.filter(

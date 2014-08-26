@@ -60,16 +60,14 @@
 
 <%def name="jsdefs()">
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://js.balancedpayments.com/v1/balanced.dev.js"></script>
+<script type="text/javascript" src="https://js.balancedpayments.com/1.1/balanced.js"></script>
 <script type="text/javascript" src="/js/base.js"></script>
 <script type="text/javascript">
     var csrf = '${ session.get('_csrf_token') }';
-    var marketplaceUri = '${ marketplace_uri }';
     //  kick everything off when jquery is ready
     $(function () {
         rentmybike.init({
-            csrfToken:csrf,
-            marketplaceUri:marketplaceUri
+            csrfToken:csrf
         });
     });
 </script>

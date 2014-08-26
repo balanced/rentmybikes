@@ -45,7 +45,7 @@ ${ utils.bike(listing) }
         if not is_guest:
             kwargs['autofocus'] = 'autofocus'
     %>
-    ${ utils.render_field(form.card_number, class_='span5',
+    ${ utils.render_field(form.number, class_='span5',
         autocomplete="off", **kwargs) }
     <div class="control-group">
         <label for="expiration_month">Expiration Date</label>

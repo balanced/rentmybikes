@@ -195,10 +195,10 @@ class TestMerchantFlow(SystemTestCase):
     def test_anonymous_listing_with_existing_buyer_account(self):
         email_address = email_generator.next()
         card = balanced.Card(
-            card_number='4111111111111111',
+            number='4111111111111111',
             expiration_month=12,
             expiration_year=2020,
-            security_code=123
+            cvv=123
         ).save()
         ogaccount = balanced.Marketplace.my_marketplace.create_buyer(
             email_address, card.uri,

@@ -40,12 +40,12 @@ class CreditCardForm(Form):
     """
     What we require in order to tokenize a card.
     """
-    card_number = TextField('Credit Card Number', [validators.Required()])
+    number = TextField('Credit Card Number', [validators.Required()])
     expiration_month = SelectField('Expiration Date', [validators.Required()],
         choices=months())
     expiration_year = SelectField('Expiration Year', [validators.Required()],
         choices=years())
-    security_code = TextField('Security Code', [validators.Required()])
+    cvv = TextField('Security Code', [validators.Required()])
 
 
 class PurchaseForm(CreditCardForm):

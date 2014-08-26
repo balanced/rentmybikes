@@ -27,7 +27,7 @@ DEFAULT_USERS = [
 
 DOMAIN_URI = 'http://www.example.com'
 
-BALANCED_SECRET = '6289680a886c11e2a44a026ba7cd33d0'
+BALANCED_SECRET = '17ca08eca7a211e2ac83026ba7cac9da'
 
 DB_URI = 'sqlite://'
 DB_DEBUG = False
