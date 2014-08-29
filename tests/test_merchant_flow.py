@@ -30,7 +30,6 @@ class TestMerchantFlow(SystemTestCase):
 
         # check in balanced
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
         self.assertEqual(account.email_address, email_address)
 
     def test_authenticated_listing(self, email_address=None):
@@ -46,7 +45,6 @@ class TestMerchantFlow(SystemTestCase):
         user = User.query.filter(
             User.email_address == email_address).one()
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
         self.assertEqual(account.email_address, email_address)
 
     def test_anonymous_listing_with_bank_account(self):
@@ -69,7 +67,6 @@ class TestMerchantFlow(SystemTestCase):
 
         # check in balanced
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
         self.assertEqual(account.email_address, email_address)
         self.assertTrue(
             [ba for ba in account.bank_accounts if bank_account.id in ba.uri]
@@ -92,7 +89,6 @@ class TestMerchantFlow(SystemTestCase):
         user = User.query.filter(
             User.email_address == email_address).one()
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
         self.assertEqual(account.email_address, email_address)
         self.assertTrue(
             [ba for ba in account.bank_accounts if bank_account.id in ba.uri]
@@ -188,7 +184,6 @@ class TestMerchantFlow(SystemTestCase):
 
         # check in balanced
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
         self.assertEqual(account.email_address, email_address)
         self.assertEqual(ogaccount.uri, account.uri)
 
@@ -218,7 +213,5 @@ class TestMerchantFlow(SystemTestCase):
 
         # check in balanced
         account = user.balanced_account
-        self.assertTrue('merchant' in account.roles)
-        self.assertTrue('buyer' in account.roles)
         self.assertEqual(account.email_address, email_address)
         self.assertEqual(ogaccount.uri, account.uri)
