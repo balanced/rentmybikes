@@ -62,9 +62,8 @@ class TestBuyerFlow(SystemTestCase):
 
         # check in balanced
         account = user.balanced_account
-        self.assertTrue('buyer' in account.roles)
-        self.assertEqual(account.email_address, email_address)
-        transaction_sum = sum(h.amount for h in account.holds)
+        self.assertEqual(account.email, email_address)
+        transaction_sum = sum(h.amount for h in account.card_holds)
         expected_sum = sum(r.bike.price for r in rentals) * 100
         self.assertEqual(transaction_sum, expected_sum)
 
@@ -95,20 +94,21 @@ class TestBuyerFlow(SystemTestCase):
         email_address = email_generator.next()
         # 1. create an account on balanced
         card_uri = self._card_payload()
-        balanced.Marketplace.my_marketplace.create_buyer(
-            email_address, card_uri=card_uri,
+        balanced.Customer(
+            email=email_address, source=card_uri,
         )
 
         # 2. anonymous purchase using this account should work.
         self.test_anonymous_purchase()
 
-    def test_anonymous_purchase_with_existing_merchant_account(self, *_):
+    def test_anonymous_purchase_with_existing_customer_account(self, *_):
         email_address = email_generator.next()
         # 1. create an account on balanced
-        payload = merchant_fixtures.balanced_merchant_payload(email_address)
-        balanced.Marketplace.my_marketplace.create_merchant(
-            email_address, merchant=payload['merchant'],
+        payload = merchant_fixtures.balanced_customer_payload(email_address)
+        customer = balanced.Customer(
+            email=email_address, merchant=payload['customer'],
         )
+        customer.save()
         # 2. anonymous purchase using this account should work.
         self.test_anonymous_purchase()
 

@@ -50,7 +50,7 @@ class User(Base):
     @property
     def balanced_account(self):
         if self.account_uri:
-            return balanced.Account.find(self.account_uri)
+            return balanced.Customer.fetch(self.account_uri)
 
     @staticmethod
     def create_guest_user(email_address, name=None, password=None):
@@ -79,40 +79,26 @@ class User(Base):
             account = self._create_balanced_buyer(card_uri)
         else:
             account = self._create_balanced_merchant(merchant_data)
-        self.associate_balanced_account(account.uri)
+        self.associate_balanced_account(account.href)
         return account
 
-    def _create_balanced_buyer(self, card_uri):
+    def _create_balanced_buyer(self, card_href):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = marketplace.create_buyer(self.email_address,
-                name=self.name, card_uri=card_uri)
+            account = balanced.Customer(email=self.email_address,
+                                        name=self.name, source=card_href)
+            account.save()
         except balanced.exc.HTTPError as ex:
             # if 500 then this attribute is not set...
-            if getattr(ex, 'category_code', None) == 'duplicate-email-address':
-                # account already exists, let's upsert
-                account = marketplace.accounts.filter(
-                    email_address=self.email_address).one()
-                account.add_card(card_uri)
-            else:
                 raise
         return account
 
     def _create_balanced_merchant(self, merchant_data):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = marketplace.create_merchant(self.email_address,
+            account = balanced.Customer(self.email_address,
                 name=self.name, merchant=merchant_data)
         except balanced.exc.HTTPError as ex:
-            if getattr(ex, 'category_code', None) == 'duplicate-email-address':
-                # account already exists, let's upsert
-                account = marketplace.accounts.filter(
-                    email_address=self.email_address).one()
-                if 'merchant' in account.roles:
-                    merchant_data.pop('dob')
-                    merchant_data.pop('state')
-                account.add_merchant(merchant_data)
-            else:
                 raise
         return account
 
@@ -134,12 +120,12 @@ class User(Base):
         will also fail if the local user already has an account assigned.
         """
         if account_uri:
-            balanced_email_address = balanced.Account.find(
-                account_uri).email_address
+            balanced_email = balanced.Customer.fetch(
+                account_uri).email
         else:
-            balanced_email_address = balanced.Account.filter(
-                email_address=self.email_address).one()
-        if balanced_email_address != self.email_address:
+            balanced_email = balanced.Customer.filter(
+                email=self.email).one()
+        if balanced_email != self.email_address:
             # someone is trying to claim an account that doesn't belong to them
             raise Exception('Email address mismatch.')
         if self.account_uri and self.account_uri != account_uri:
