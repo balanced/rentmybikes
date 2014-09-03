@@ -1,18 +1,16 @@
 from __future__ import unicode_literals
 
 
-def balanced_merchant_payload(email_address):
+def balanced_customer_payload(email):
     return {
-        'email_address': email_address,
-        'merchant': {
+        'email': email,
+        'customer': {
             'type': 'person',
-            'email_address': email_address,
+            'email': email,
             'name': 'Krusty the Klown',
-            'street_address': '801 High St',
-            'postal_code': '94301',
-            'country_code': 'USA',
-            'dob': '1980-05-01',
-            'phone_number': '9046281796',
+            'dob_month': '01',
+            'dob_year': '1978',
+            'phone': '9046281796',
             'production': False,
             }
     }

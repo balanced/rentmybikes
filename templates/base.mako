@@ -15,7 +15,7 @@
         <div class="minor">
             <nav>
             % if request.user.is_authenticated:
-                <li>${ request.user.email_address }</li>
+                <li>${ request.user.email }</li>
                 % if request.user.account_uri:
                 <li><a href="${ url_for('transactions.index') }">transaction history</a></li>
                 % endif
@@ -67,7 +67,7 @@
     //  kick everything off when jquery is ready
     $(function () {
         rentmybike.init({
-            csrfToken:csrf
+            csrfToken:csrf,
         });
     });
 </script>

@@ -28,7 +28,7 @@ class ControllerTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(ControllerTestCase, cls).setUpClass()
-        balanced.configure(cls.config['BALANCED_SECRET'])
+        balanced.configure('17ca08eca7a211e2ac83026ba7cac9da')
         cls.marketplace = balanced.Marketplace.mine
 
     def setUp(self):
@@ -59,40 +59,42 @@ class ControllerTestCase(TestCase):
     def default_args(self):
         return dict(limit=50, offset=0, order_by=u'created_at')
 
-    def generate_an_email_address(self):
+    def generate_an_email(self):
         return self.generator.next()
 
 
 class SystemTestCase(ControllerTestCase):
 
-    def _create_user(self, email_address):
+    def _create_user(self, email):
         user_payload = {
             '_csrf_token': self.get_csrf_token(),
-            'account-email_address': email_address,
+            'account-email': email,
             'account-name': 'Bob Geldof',
             'account-password': 'ab',
-            }
+        }
         resp = self.client.post('/accounts/new', data=user_payload)
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 201)
 
-    def _guest_listing_payload(self, email_address):
+    def _guest_listing_payload(self, email):
         return {
             '_csrf_token': self.get_csrf_token(),
             'guest-type': 'person',
             'guest-listing_id': 1,
             'guest-name': 'Krusty the Klown',
-            'guest-email_address': email_address,
-            'guest-street_address': '801 High St',
-            'guest-postal_code': '94301',
-            'guest-country_code': 'USA',
-            'guest-date_of_birth_month': 5,
-            'guest-date_of_birth_year': 1956,
-            'guest-phone_number': '9046281796',
+            'guest-email': email,
+            # 'guest-address': {
+            # 'line1': '801 High St',
+            # 'postal_code': '94301',
+            # 'country_code': 'USA'
+            # },
+            'guest-dob_month': 5,
+            'guest-dob_year': 1956,
+            'guest-phone': '9046281796',
             'guest-password': 'ab',
             }
 
-    def _guest_listing_payload_fail_kyc(self, email_address):
-        payload = self._guest_listing_payload(email_address)
+    def _guest_listing_payload_fail_kyc(self, email):
+        payload = self._guest_listing_payload(email)
         payload['guest-state'] = 'EX'
         payload['guest-postal_code'] = '99999'
         return payload
@@ -102,12 +104,14 @@ class SystemTestCase(ControllerTestCase):
             '_csrf_token': self.get_csrf_token(),
             'listing-type': 'person',
             'listing-listing_id': 1,
-            'listing-street_address': '801 High St',
+            'listing-address': {
+            'line1': '801 High St',
             'listing-postal_code': '94301',
-            'listing-country_code': 'USA',
-            'listing-date_of_birth_month': 5,
-            'listing-date_of_birth_year': 1956,
-            'listing-phone_number': '9046281796',
+            'listing-country_code': 'USA'
+            },
+            'listing-dob_month': 5,
+            'listing-dob_year': 1956,
+            'listing-phone': '9046281796',
             }
 
     def _listing_payload_fail_kyc(self):
@@ -116,8 +120,8 @@ class SystemTestCase(ControllerTestCase):
         payload['listing-postal_code'] = '99999'
         return payload
 
-    def _merchant_payload(self, email_address):
-        return merchant.balanced_merchant_payload(email_address)
+    def _merchant_payload(self, email):
+        return merchant.balanced_customer_payload(email)
 
 
 def email_generator():

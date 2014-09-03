@@ -35,7 +35,7 @@ users = Table('users', metadata,
     Column('password_hash', Unicode),
     Column('has_password', Boolean, default=False, nullable=False),
     Column('name', Unicode),
-    Column('email_address', Unicode, nullable=False, unique=True),
+    Column('email', Unicode, nullable=False, unique=True),
 
     # balanced uri of the Balanced account
     Column('account_uri', Unicode),

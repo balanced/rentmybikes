@@ -17,8 +17,8 @@ def index():
     account_uri = request.user.account_uri
     if not account_uri:
         try:
-            account = balanced.Account.query.filter(
-                email_address=self.request.user.email_address).one()
+            account = balanced.Customer.query.filter(
+                email=self.request.user.email).one()
         except balanced.exc.NoResultFound:
             return redirect(url_for('accounts.index',
                 reason='no-balanced-account'))

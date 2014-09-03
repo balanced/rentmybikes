@@ -42,14 +42,14 @@
         }
 
         var name = $('[name$="name"]', $form).val();
-        var emailAddress = $('[name$="email_address"]', $form).val();
+        var emailAddress = $('[name$="email"]', $form).val();
 
         //  validate form
         if (!name) {
             addErrorToField($form, 'name');
         }
         if (!balanced.emailAddress.validate(emailAddress)) {
-            addErrorToField($form, 'email_address');
+            addErrorToField($form, 'email');
         }
         if (!balanced.card.isCardNumberValid(cardData.number)) {
             addErrorToField($form, 'number');
@@ -127,28 +127,28 @@
             }
         }
 
-        merchantData.dob = merchantData.date_of_birth_year + '-' + merchantData.date_of_birth_month;
-        delete merchantData.date_of_birth_year;
-        delete merchantData.date_of_birth_month;
+        merchantData.dob = merchantData.dob_year + '-' + merchantData.dob_month;
+        delete merchantData.dob_year;
+        delete merchantData.dob_month;
 
         if (!merchantData.name) {
             addErrorToField($form, 'name');
         }
 
-        if (!balanced.emailAddress.validate(merchantData.email_address)) {
-            addErrorToField($form, 'email_address');
+        if (!balanced.emailAddress.validate(merchantData.email)) {
+            addErrorToField($form, 'email');
         }
 
-        if (!merchantData.  street_address) {
-            addErrorToField($form, 'street_address');
+        if (!merchantData.line1) {
+            addErrorToField($form, 'line1');
         }
 
         if (!merchantData.postal_code) {
             addErrorToField($form, 'postal_code');
         }
 
-        if (!merchantData.phone_number) {
-            addErrorToField($form, 'phone_number');
+        if (!merchantData.phone) {
+            addErrorToField($form, 'phone');
         }
 
         var hasBankAccount = false;

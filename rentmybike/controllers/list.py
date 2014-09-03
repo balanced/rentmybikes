@@ -20,21 +20,22 @@ class ListingManager(object):
 
     def create(self, form, bank_account_form):
         listing_id = form.listing_id.data
-        email_address = form.email_address.data
+        email = form.email.data
         name = form.name.data
         merchant_data = form.data.copy()
         password = merchant_data.pop('password', None)
-        month = merchant_data.pop('date_of_birth_month')
-        year = merchant_data.pop('date_of_birth_year')
-        merchant_data['dob'] = '{}-{}'.format(year, month)
+        month = merchant_data.pop('dob_month')
+        year = merchant_data.pop('dob_year')
+        merchant_data['dob_month'] = month
+        merchant_data['dob_year'] = year
         merchant_data.pop('listing_id')
-        if not merchant_data.get('email_address', None):
-            merchant_data.pop('email_address', None)
+        if not merchant_data.get('email', None):
+            merchant_data.pop('email', None)
 
         if request.user.is_authenticated:
             user = request.user
         else:
-            user = User.create_guest_user(email_address, name, password)
+            user = User.create_guest_user(email, name, password)
             # do this password check as a guest user should not be able to take
             # over an existing account without authentication
             # flush to ensure password gets hashed
@@ -62,18 +63,18 @@ class ListingManager(object):
             user.create_balanced_account(merchant_data=merchant_data)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
-                'email_address' in ex.description):
+                'email' in ex.description):
                 user.associate_balanced_account()
                 user.add_merchant(merchant_data)
             else:
                 raise
 
-    def _associate_email_and_account(self, email_address, account_uri):
+    def _associate_email_and_account(self, email, account_uri):
         if request.user.is_authenticated:
             user = request.user
         else:
             # we're creating an account as they list, create a guest user.
-            user = User.create_guest_user(email_address)
+            user = User.create_guest_user(email)
             # flush to db, to force guid creation as we're about to log them
             # in.
             Session.flush()
@@ -136,7 +137,7 @@ def create(**kwargs):
         form = listing_form
     else:
         form = guest_listing_form
-        session['email_address'] = form.email_address.data
+        session['email'] = form.email.data
 
     if not form.validate():
         return index(**kwargs)
@@ -151,13 +152,13 @@ def create(**kwargs):
             return redirect(url_for('redirect.show',
                 listing=form.listing_id.data,
                 redirect_uri=ex.response.headers['location'],
-                email_address=session.get('email_address')))
+                email=session.get('email')))
         elif ex.status_code == 400:
             if 'merchant.postal_code' in ex.description:
                 form['postal_code'].errors.append(ex.description)
                 return index(**kwargs)
-            elif 'merchant.phone_number' in ex.description:
-                form['phone_number'].errors.append(ex.description)
+            elif 'merchant.phone' in ex.description:
+                form['phone'].errors.append(ex.description)
                 return index(**kwargs)
         raise
     except Exception as ex:
@@ -192,12 +193,12 @@ def confirm(listing):
 def complete(listing):
     listing = Listing.query.get(listing.id)
     if request.user.is_authenticated:
-        email_address = request.user.email_address
+        email = request.user.email
     else:
-        email_address = session['email_address']
+        email = session['email']
     return 'list/complete.mako', {
         'listing': listing,
-        'email_address': email_address,
+        'email': email,
         }
 
 
@@ -210,7 +211,7 @@ def interstitial(listing_id):
         'redirect_uri': '{}/account/verify?listing_id={}'.format(
             current_app.config['DOMAIN_URI'], listing_id),
         'application_type': 'person',
-        'email_address': request.args.get('email_address'),
+        'email': request.args.get('email'),
     }
     redirect_to = (redirect_uri + '?' + urllib.urlencode(query))
 

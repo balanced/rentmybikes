@@ -61,9 +61,9 @@ class RentMyBike(Flask):
 
     def add_dummy_data(self):
         for name, email, password in config['DEFAULT_USERS']:
-            user = User.query.filter(User.email_address == email).count()
+            user = User.query.filter(User.email == email).count()
             if not user:
-                user = User(name=name, email_address=email, password=password)
+                user = User(name=name, email=email, password=password)
                 Session.add(user)
 
         for i in range(4):

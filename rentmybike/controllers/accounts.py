@@ -86,26 +86,25 @@ def create(**kwargs):
 @route('/accounts/verify', 'accounts.verify')
 def verify():
     # user cancelled out of authentication process
-    if 'email_address' not in request.args:
+    if 'email' not in request.args:
         return redirect('/')
-    email_address = request.args['email_address']
+    email = request.args['email']
     listing_id = request.args['listing_id']
     merchant_uri = request.args['merchant_uri']
     marketplace = balanced.Marketplace.my_marketplace
 
     try:
-        account = marketplace.create_merchant(email_address=email_address,
-            merchant_uri=merchant_uri)
+        account = balanced.Customer(email=email, merchant_uri=merchant_uri)
     except balanced.exc.HTTPError as ex:
         # shit, that sucked
         if getattr(ex, 'category_code', None) == 'duplicate-email-address':
             account = marketplace.accounts.filter(
-                email_address=email_address).one()
+                email=email).one()
         else:
             raise
     if account:
-        user = User.create_guest_user(email_address=email_address)
+        user = User.create_guest_user(email=email)
         user.associate_balanced_account(account.uri)
         Session.commit()
-        session['email_address'] = email_address
+        session['email'] = email
     return redirect(url_for('listing.complete', listing=listing_id))

@@ -31,9 +31,9 @@ class User(Base):
         self.password_hash = generate_password_hash(password)
 
     @staticmethod
-    def login(email_address, password):
+    def login(email, password):
         try:
-            user = User.query.filter(User.email_address == email_address).one()
+            user = User.query.filter(User.email == email).one()
         except NoResultFound:
             pass
         else:
@@ -53,13 +53,13 @@ class User(Base):
             return balanced.Customer.fetch(self.account_uri)
 
     @staticmethod
-    def create_guest_user(email_address, name=None, password=None):
+    def create_guest_user(email, name=None, password=None):
         try:
             user = User.query.filter(
-                User.email_address == email_address).one()
+                User.email == email).one()
         except NoResultFound:
             Session.flush()
-            user = User(email_address=email_address, name=name,
+            user = User(email=email, name=name,
                 password=password)
             Session.add(user)
             try:
@@ -85,7 +85,7 @@ class User(Base):
     def _create_balanced_buyer(self, card_href):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = balanced.Customer(email=self.email_address,
+            account = balanced.Customer(email=self.email,
                                         name=self.name, source=card_href)
             account.save()
         except balanced.exc.HTTPError as ex:
@@ -96,8 +96,8 @@ class User(Base):
     def _create_balanced_merchant(self, merchant_data):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = balanced.Customer(self.email_address,
-                name=self.name, merchant=merchant_data)
+            account = balanced.Customer(email=self.email,
+                name=self.name, merchant=merchant_data).save()
         except balanced.exc.HTTPError as ex:
                 raise
         return account
@@ -106,8 +106,7 @@ class User(Base):
         if self.account_uri:
             return
         try:
-            account = balanced.Account.query.filter(
-                email_address=self.email_address).one()
+            account = balanced.Customer.query.filter(email=self.email).one()
         except balanced.exc.NoResultFound:
             pass
         else:
@@ -125,7 +124,7 @@ class User(Base):
         else:
             balanced_email = balanced.Customer.filter(
                 email=self.email).one()
-        if balanced_email != self.email_address:
+        if balanced_email != self.email:
             # someone is trying to claim an account that doesn't belong to them
             raise Exception('Email address mismatch.')
         if self.account_uri and self.account_uri != account_uri:
@@ -138,14 +137,15 @@ class User(Base):
         Adds a card to an account within Balanced.
         """
         try:
-            account = balanced.Account.query.filter(
-                email_address=self.email_address).one()
+            account = balanced.Customer.query.filter(
+                email=self.email).one()
         except balanced.exc.NoResultFound:
-            account = balanced.Marketplace.create_buyer(
-                email_address=self.email_address, card_uri=card_uri,
-                name=self.name)
+            account = balanced.Customer(
+                email=self.email, card_uri=card_uri,
+                name=self.name).save()
         else:
-            account.add_card(card_uri)
+            card = balanced.Card.fetch(card_uri)
+            card.associate_to_customer(account.href)
         return account
 
     def add_merchant(self, merchant_data):
