@@ -65,7 +65,7 @@
 <script type="text/javascript">
     var csrf = '${ session.get('_csrf_token') }';
     //  kick everything off when jquery is ready
-    $(function () {
+    $( document ).ready(function () {
         rentmybike.init({
             csrfToken:csrf,
         });
