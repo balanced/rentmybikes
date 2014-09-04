@@ -112,63 +112,6 @@ class TestMerchantFlow(SystemTestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIsNotNone(re.search(r'/list/\d+/confirm', resp.data))
 
-    def test_anonymous_listing_fail_kyc(self):
-        email = 'anonymousunauth2@balancedpayments.com'
-        payload = self._guest_listing_payload_fail_kyc(email)
-        resp = self.client.post('/list', data=payload)
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn('/list/1/complete', resp.data)
-
-        # create the account for realz
-        with balanced.key_switcher(None):
-            api_key = balanced.APIKey(
-                **self._merchant_payload(email)
-            ).save()
-
-        merchant_href = api_key.merchant.href
-
-        # GET the redirect href
-        href = '/accounts/verify'
-        href += '?listing_id={}&email={}&merchant_href={}'.format(
-            1, email, merchant_href,
-        )
-
-        resp = self.client.get(href)
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn('/list/1/complete', resp.data)
-
-    @unittest.skip('for now')
-    def test_authenticated_listing_fail_kyc(self):
-        email = 'authfailkyc@balancedpayments.com'
-        self._create_user(email)
-        payload = self._listing_payload_fail_kyc()
-        user = User.query.filter(User.email == email).one()
-        resp = self.client.post('/list', data=payload)
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn('/list/1/complete', resp.data)
-
-        email = email_generator.next()
-        ogaccount = balanced.Customer(
-            **self._merchant_payload(email)).save()
-        payload = self._guest_listing_payload(email)
-        # create the account for realz
-        with balanced.key_switcher(None):
-            api_key = balanced.APIKey(
-                **self._merchant_payload(email)
-            ).save()
-
-        merchant_href = api_key.merchant.href
-
-        # GET the redirect href
-        href = '/accounts/verify'
-        href += '?listing_id={}&email={}&merchant_href={}'.format(
-            1, email, merchant_href,
-        )
-        user = User.query.filter(User.email == email).one()
-        self.assertFalse(user.account_href)
-        resp = self.client.get(href)
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn('/list/1/complete', resp.data)
 
     def test_anonymous_listing_with_existing_merchant_account(self):
         email = email_generator.next()
