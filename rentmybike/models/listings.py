@@ -16,11 +16,11 @@ class Listing(Base):
 
     __table__ = listings
 
-    def rent_to(self, user, card_uri=None):
+    def rent_to(self, user, card_href=None):
         account = user.balanced_account
 
-        if card_uri:
-            card = balanced.Card.fetch(card_uri)
+        if card_href:
+            card = balanced.Card.fetch(card_href)
         else:
             if not account.cards.count():
                 raise Exception('No card on file')
@@ -34,7 +34,7 @@ class Listing(Base):
         debit = card.debit(self.price * 100)
 
         rental = Rental(buyer_guid=user.guid,
-            debit_uri=debit.href, bike_guid=self.id)
+            debit_href=debit.href, bike_guid=self.id)
 
         Session.add(rental)
         return rental

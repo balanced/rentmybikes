@@ -16,7 +16,7 @@ ${ utils.bike(listing, hide_button=True) }
                     <a href="${ url_for('login.index', redirect_uri=request.url) }">Sign me in</a>.</p>
                 ${ form(guest_listing_form) }
                 % endif
-                % if not bank_account_form.bank_account_uri.data:
+                % if not bank_account_form.bank_account_href.data:
                 <fieldset>
                     <legend>Add your bank account <span>(optional)</span></legend>
                     ${ utils.render_field(bank_account_form.account_number) }

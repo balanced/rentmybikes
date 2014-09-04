@@ -14,8 +14,8 @@ from rentmybike.db import Session
 @route('/transactions', 'transactions.index')
 @authenticated()
 def index():
-    account_uri = request.user.account_uri
-    if not account_uri:
+    account_href = request.user.account_href
+    if not account_href:
         try:
             account = balanced.Customer.query.filter(
                 email=self.request.user.email).one()
@@ -23,13 +23,13 @@ def index():
             return redirect(url_for('accounts.index',
                 reason='no-balanced-account'))
         else:
-            request.user.account_uri = account_uri = account.uri
+            request.user.account_href = account_href = account.href
             Session.commit()
 
     # let's create a login token for this user
     token_uri = 'https://dashboard.balancedpayments.com/v1/logins'
     data = {
-        'account_uri': account_uri,
+        'account_href': account_href,
         'redirect_uri': config['DOMAIN_URI'],
     }
     result = requests.post(token_uri, data=json.dumps(data),

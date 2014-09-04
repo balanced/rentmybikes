@@ -16,7 +16,7 @@
             <nav>
             % if request.user.is_authenticated:
                 <li>${ request.user.email }</li>
-                % if request.user.account_uri:
+                % if request.user.account_href:
                 <li><a href="${ url_for('transactions.index') }">transaction history</a></li>
                 % endif
                 <li><a href="${ url_for('logout') }">log out</a></li>
@@ -65,7 +65,7 @@
 <script type="text/javascript">
     var csrf = '${ session.get('_csrf_token') }';
     //  kick everything off when jquery is ready
-    $( document ).ready(function () {
+    $( document).ready(function () {
         rentmybike.init({
             csrfToken:csrf,
         });

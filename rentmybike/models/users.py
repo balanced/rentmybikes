@@ -50,8 +50,8 @@ class User(Base):
 
     @property
     def balanced_account(self):
-        if self.account_uri:
-            return balanced.Customer.fetch(self.account_uri)
+        if self.account_href:
+            return balanced.Customer.fetch(self.account_href)
 
     @staticmethod
     def create_guest_user(email, name=None, password=None):
@@ -71,12 +71,12 @@ class User(Base):
                 Session.commit()
         return user
 
-    def create_balanced_account(self, card_uri=None,
+    def create_balanced_account(self, card_href=None,
                                 merchant_data=None):
-        if self.account_uri:
+        if self.account_href:
             raise Exception('User already has a balanced account')
-        if card_uri:
-            account = self._create_balanced_buyer(card_uri)
+        if card_href:
+            account = self._create_balanced_buyer(card_href)
         else:
             account = self._create_balanced_merchant(merchant_data)
         self.associate_balanced_account(account.href)
@@ -103,36 +103,36 @@ class User(Base):
         return account
 
     def lookup_balanced_account(self):
-        if self.account_uri:
+        if self.account_href:
             return
         try:
             account = balanced.Customer.query.filter(email=self.email).one()
         except wac.NoResultFound:
             pass
         else:
-            self.account_uri = account.href
+            self.account_href = account.href
 
-    def associate_balanced_account(self, account_uri=None):
+    def associate_balanced_account(self, account_href=None):
         """
-        Assign a Balanced account_uri to a user. This will check that the
+        Assign a Balanced account_href to a user. This will check that the
         email addresses within balanced and our local system match first. It
         will also fail if the local user already has an account assigned.
         """
-        if account_uri:
+        if account_href:
             balanced_email = balanced.Customer.fetch(
-                account_uri).email
+                account_href).email
         else:
             balanced_email = balanced.Customer.filter(
                 email=self.email).one()
         if balanced_email != self.email:
             # someone is trying to claim an account that doesn't belong to them
             raise Exception('Email address mismatch.')
-        if self.account_uri and self.account_uri != account_uri:
+        if self.account_href and self.account_href != account_href:
             # it shouldn't be possible to claim another account
             raise Exception('Account mismatch')
-        self.account_uri = account_uri
+        self.account_href = account_href
 
-    def add_card(self, card_uri):
+    def add_card(self, card_href):
         """
         Adds a card to an account within Balanced.
         """
@@ -140,10 +140,10 @@ class User(Base):
             account = balanced.Customer.query.filter(email=self.email).one()
         except wac.NoResultFound:
             account = balanced.Customer(
-                email=self.email, card_uri=card_uri,
+                email=self.email, card_href=card_href,
                 name=self.name).save()
         else:
-            card = balanced.Card.fetch(card_uri)
+            card = balanced.Card.fetch(card_href)
             card.associate_to_customer(account.href)
         return account
 

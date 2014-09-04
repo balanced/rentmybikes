@@ -17,7 +17,7 @@ class RentalManager(object):
         super(RentalManager, self).__init__()
         self.request = request
 
-    def rent(self, listing, email, card_uri, name=None):
+    def rent(self, listing, email, card_href, name=None):
 
         Session.flush()
         if request.user.is_authenticated:
@@ -27,26 +27,26 @@ class RentalManager(object):
 
             # this user has not authenticated with their email/password combo
             # we cannot allow them to charge an existing card if it exists
-            if not card_uri:
+            if not card_href:
                 raise Exception('Non-authenticated user must supply card data')
 
         Session.flush()  # ensure there is no db inconsistency
-        if not user.account_uri:
-            self.create_balanced_account(user, card_uri)
+        if not user.account_href:
+            self.create_balanced_account(user, card_href)
         else:
-            if card_uri:
-                user.add_card(card_uri)
+            if card_href:
+                user.add_card(card_href)
 
         Session.flush()  # ensure there is no db inconsistency
-        return listing.rent_to(user, card_uri)
+        return listing.rent_to(user, card_href)
 
-    def create_balanced_account(self, user, card_uri):
+    def create_balanced_account(self, user, card_href):
         # user does not yet have a Balanced account, we need to create
         # this here. this may raise an exception if the data is
         # incorrect or the email address is already associated with an
         # existing account.
         try:
-            user.create_balanced_account(card_uri=card_uri)
+            user.create_balanced_account(card_href=card_href)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
                 'email' in ex.description):
@@ -73,7 +73,7 @@ def show(listing, purchase_form=None, guest_purchase_form=None, force_form=False
     # to charge this account without entering their card details.
     if (not force_form and
         request.user.is_authenticated and
-        request.user.account_uri and
+        request.user.account_href and
         'buyer' in request.user.balanced_account.roles):
         is_buyer = True
         purchase_form = None
@@ -102,7 +102,7 @@ def update(listing, **kwargs):
     forms = kwargs.pop('forms')
     purchase_form = find_form(forms, PurchaseForm)
     guest_purchase_form = find_form(forms, GuestPurchaseForm)
-    card_uri = request.form.get('card_uri', None)
+    card_href = request.form.get('card_href', None)
     name = None
 
     if request.user.is_authenticated:
@@ -112,7 +112,7 @@ def update(listing, **kwargs):
         name = guest_purchase_form.name.data
 
     try:
-        rental = manager.rent(listing, email_address, card_uri, name)
+        rental = manager.rent(listing, email_address, card_href, name)
     except balanced.exc.HTTPError as ex:
         msg = 'Error debiting account, your card has not been charged "{}"'
         flash(msg.format(ex.message), 'error')
@@ -127,7 +127,7 @@ def update(listing, **kwargs):
             'Rental Receipt',
             'receipt.mako',
             name=rental.buyer.email, listing=listing,
-            charge=balanced.Transaction.fetch(rental.debit_uri)
+            charge=balanced.Transaction.fetch(rental.debit_href)
         )
         session['rental_user_guid'] = rental.buyer.guid
         session['rental_email'] = rental.buyer.email
@@ -142,7 +142,7 @@ def show_confirmed(listing, rental):
         raise NotFound()
 
     email = session['rental_email']
-    charge = balanced.Transaction.fetch(rental.debit_uri)
+    charge = balanced.Transaction.fetch(rental.debit_href)
     return 'rent/complete.mako', {
         'listing': listing,
         'rental': rental,

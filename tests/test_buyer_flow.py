@@ -32,16 +32,16 @@ class TestBuyerFlow(SystemTestCase):
 
         self.session.flush()
 
-    def _rental_payload(self, card_uri=None):
-        if not card_uri:
-            card_uri = self._card_payload()
+    def _rental_payload(self, card_href=None):
+        if not card_href:
+            card_href = self._card_payload()
         return {
             '_csrf_token': self.get_csrf_token(),
-            'card_uri': card_uri,
+            'card_href': card_href,
             }
 
-    def _guest_rental_payload(self, email, card_uri=None):
-        payload = self._rental_payload(card_uri)
+    def _guest_rental_payload(self, email, card_href=None):
+        payload = self._rental_payload(card_href)
         payload['guest-name'] = 'Chimmy Changa'
         payload['guest-email'] = email
         return payload
@@ -93,9 +93,9 @@ class TestBuyerFlow(SystemTestCase):
     def test_anonymous_purchase_with_existing_buyer_account(self, *_):
         email = email_generator.next()
         # 1. create an account on balanced
-        card_uri = self._card_payload()
+        card_href = self._card_payload()
         balanced.Customer(
-            email=email, source=card_uri,
+            email=email, source=card_href,
         )
 
         # 2. anonymous purchase using this account should work.
@@ -131,7 +131,7 @@ class TestBuyerFlow(SystemTestCase):
         self._rent(payload)
 
         payload = self._rental_payload()
-        payload.pop('card_uri')
+        payload.pop('card_href')
         self._rent(payload)
         self._verify_buyer_transactions(email)
 

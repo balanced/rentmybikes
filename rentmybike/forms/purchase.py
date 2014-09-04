@@ -56,7 +56,7 @@ class PurchaseForm(CreditCardForm):
     name = HiddenField(validators=[validators.Required()])
     email = HiddenField(validators=[validators.Required(),
                                             validators.Email()])
-    card_uri = HiddenField(validators=[validators.Required()])
+    card_href = HiddenField(validators=[validators.Required()])
 
 
 class GuestPurchaseForm(PurchaseForm):

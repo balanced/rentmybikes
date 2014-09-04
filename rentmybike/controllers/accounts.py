@@ -90,11 +90,11 @@ def verify():
         return redirect('/')
     email = request.args['email']
     listing_id = request.args['listing_id']
-    merchant_uri = request.args['merchant_uri']
+    merchant_href = request.args['merchant_href']
     marketplace = balanced.Marketplace.my_marketplace
 
     try:
-        account = balanced.Customer(email=email, merchant_uri=merchant_uri)
+        account = balanced.Customer(email=email, merchant_href=merchant_href)
     except balanced.exc.HTTPError as ex:
         # shit, that sucked
         if getattr(ex, 'category_code', None) == 'duplicate-email-address':

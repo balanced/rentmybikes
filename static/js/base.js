@@ -78,7 +78,7 @@
                 //  IMPORTANT - remove sensitive data to remain PCI compliant
                 removeSensitiveFields($form, sensitiveFields);
                 $form.find('input').removeAttr('disabled');
-                $('<input type="hidden" name="card_uri" value="' + response.data.href + '">').appendTo($form);
+                $('<input type="hidden" name="card_href" value="' + response.data.href + '">').appendTo($form);
                 $form.unbind('submit', submitPurchase).submit();
                 break;
             case 400:
@@ -103,7 +103,7 @@
                 showError('We couldn\'t authorize this card, please check your card details and try again');
                 break;
             case 404:
-                console.warn('your marketplace URI is incorrect');
+                console.warn('your marketplace HREF is incorrect');
                 break;
             case 500:
                 console.error('Balanced did something bad, this will never happen, but if it does please retry the request');
@@ -181,7 +181,7 @@
             case 201:
                 $form.find('input,select').removeAttr('disabled');
                 showProcessing('Performing identity check...', 66);
-                $('<input type="hidden" name="bank_account_uri" value="' + response.data.uri + '">').appendTo($form);
+                $('<input type="hidden" name="bank_account_href" value="' + response.data.href + '">').appendTo($form);
                 $form.unbind('submit', submitKYC).submit();
             //  todo - what if we have a 409?
         }

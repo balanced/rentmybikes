@@ -53,7 +53,7 @@ class TestMerchantFlow(SystemTestCase):
         bank_account = balanced.BankAccount(name='Myata Marketplace',
             account_number=321174851, routing_number=321174851
         ).save()
-        payload['bank_account_uri'] = bank_account.href
+        payload['bank_account_href'] = bank_account.href
         resp = self.client.post('/list', data=payload)
         self.assertEqual(resp.status_code, 302)
         self.assertIn('/list/1/complete', resp.data)
@@ -79,7 +79,7 @@ class TestMerchantFlow(SystemTestCase):
         bank_account = balanced.BankAccount(name='Bob Saget',
             account_number=321174851, routing_number=321174851
         ).save()
-        payload['bank_account_uri'] = bank_account.href
+        payload['bank_account_href'] = bank_account.href
         user = User.query.filter(User.email == email).one()
         resp = self.client.post('/list', data=payload)
         self.assertEqual(resp.status_code, 302)
@@ -125,15 +125,15 @@ class TestMerchantFlow(SystemTestCase):
                 **self._merchant_payload(email)
             ).save()
 
-        merchant_uri = api_key.merchant.uri
+        merchant_href = api_key.merchant.href
 
-        # GET the redirect uri
-        uri = '/accounts/verify'
-        uri += '?listing_id={}&email={}&merchant_uri={}'.format(
-            1, email, merchant_uri,
+        # GET the redirect href
+        href = '/accounts/verify'
+        href += '?listing_id={}&email={}&merchant_href={}'.format(
+            1, email, merchant_href,
         )
 
-        resp = self.client.get(uri)
+        resp = self.client.get(href)
         self.assertEqual(resp.status_code, 302)
         self.assertIn('/list/1/complete', resp.data)
 
@@ -157,16 +157,16 @@ class TestMerchantFlow(SystemTestCase):
                 **self._merchant_payload(email)
             ).save()
 
-        merchant_uri = api_key.merchant.uri
+        merchant_href = api_key.merchant.href
 
-        # GET the redirect uri
-        uri = '/accounts/verify'
-        uri += '?listing_id={}&email={}&merchant_uri={}'.format(
-            1, email, merchant_uri,
+        # GET the redirect href
+        href = '/accounts/verify'
+        href += '?listing_id={}&email={}&merchant_href={}'.format(
+            1, email, merchant_href,
         )
         user = User.query.filter(User.email == email).one()
-        self.assertFalse(user.account_uri)
-        resp = self.client.get(uri)
+        self.assertFalse(user.account_href)
+        resp = self.client.get(href)
         self.assertEqual(resp.status_code, 302)
         self.assertIn('/list/1/complete', resp.data)
 
