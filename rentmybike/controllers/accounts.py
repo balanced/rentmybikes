@@ -104,7 +104,7 @@ def verify():
             raise
     if account:
         user = User.create_guest_user(email=email)
-        user.associate_balanced_account(account.uri)
+        user.associate_balanced_account(account.href)
         Session.commit()
         session['email'] = email
     return redirect(url_for('listing.complete', listing=listing_id))

@@ -49,9 +49,8 @@ class ListingManager(object):
             user.add_merchant(merchant_data)
 
         if bank_account_form.bank_account_uri.data:
-            user.balanced_account.add_bank_account(
-                bank_account_form.bank_account_uri.data)
-
+            bank_account = balanced.BankAccount.fetch(bank_account_form.bank_account_uri.data)
+            bank_account.associate_to_customer(user.balanced_account.href)
         return listing_id
 
     def create_balanced_account(self, user, merchant_data):
@@ -100,7 +99,7 @@ def index(listing_form=None, guest_listing_form=None,
 
     if (request.user.is_authenticated and
         request.user.account_uri and
-        'merchant' in request.user.balanced_account.roles):
+        request.user.balanced_account.merchant_status == 'underwritten'):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 

@@ -17,15 +17,17 @@ class Listing(Base):
     __table__ = listings
 
     def rent_to(self, user, card_uri=None):
-
         account = user.balanced_account
-        card = balanced.Card.fetch(card_uri)
 
-        if not card_uri:
+        if card_uri:
+            card = balanced.Card.fetch(card_uri)
+        else:
             if not account.cards.count():
                 raise Exception('No card on file')
             if not user.has_password:
                 raise Exception('Anonymous users must specify a card')
+            else:
+                card = account.cards.first()
 
         # this will throw balanced.exc.HTTPError if it fails
 

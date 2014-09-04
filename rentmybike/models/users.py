@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import logging
 
 import balanced
+import wac
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -55,8 +56,7 @@ class User(Base):
     @staticmethod
     def create_guest_user(email, name=None, password=None):
         try:
-            user = User.query.filter(
-                User.email == email).one()
+            user = User.query.filter(User.email == email).one()
         except NoResultFound:
             Session.flush()
             user = User(email=email, name=name,
@@ -96,10 +96,10 @@ class User(Base):
     def _create_balanced_merchant(self, merchant_data):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = balanced.Customer(email=self.email,
-                name=self.name, merchant=merchant_data).save()
-        except balanced.exc.HTTPError as ex:
-                raise
+            account = balanced.Customer.query.filter(email=self.email).one()
+        except wac.NoResultFound as ex:
+            account = balanced.Customer(email=self.email, name=self.name,
+                                        merchant=merchant_data).save()
         return account
 
     def lookup_balanced_account(self):
@@ -107,10 +107,10 @@ class User(Base):
             return
         try:
             account = balanced.Customer.query.filter(email=self.email).one()
-        except balanced.exc.NoResultFound:
+        except wac.NoResultFound:
             pass
         else:
-            self.account_uri = account.uri
+            self.account_uri = account.href
 
     def associate_balanced_account(self, account_uri=None):
         """
@@ -137,9 +137,8 @@ class User(Base):
         Adds a card to an account within Balanced.
         """
         try:
-            account = balanced.Customer.query.filter(
-                email=self.email).one()
-        except balanced.exc.NoResultFound:
+            account = balanced.Customer.query.filter(email=self.email).one()
+        except wac.NoResultFound:
             account = balanced.Customer(
                 email=self.email, card_uri=card_uri,
                 name=self.name).save()
@@ -149,7 +148,12 @@ class User(Base):
         return account
 
     def add_merchant(self, merchant_data):
-        if 'merchant' in self.balanced_account.roles:
-            merchant_data.pop('dob')
-            merchant_data.pop('state')
-        self.balanced_account.add_merchant(merchant_data)
+        address_fields = ['city', 'line1', 'line2', 'state', 'postal_code',
+                          'country_code']
+        customer_resource = self.balanced_account
+        for field in merchant_data:
+            if field in address_fields:
+                customer_resource.address[field] = merchant_data[field]
+            else:
+                setattr(customer_resource, field, merchant_data[field])
+        customer_resource.save()

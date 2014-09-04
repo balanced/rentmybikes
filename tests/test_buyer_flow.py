@@ -115,7 +115,6 @@ class TestBuyerFlow(SystemTestCase):
     def test_authenticated_purchase(self, *_):
         email = email_generator.next()
         self._create_user(email)
-        # import ipdb; ipdb.set_trace()
         payload = self._rental_payload()
         self._populate_data()
         self._rent(payload)
