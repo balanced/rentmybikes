@@ -29,7 +29,7 @@ class TestMerchantFlow(SystemTestCase):
 #        self.assertTrue(user.check_password('ab'))
 
         # check in balanced
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
 
     def test_authenticated_listing(self, email=None):
@@ -44,7 +44,7 @@ class TestMerchantFlow(SystemTestCase):
         # check in balanced
         user = User.query.filter(
             User.email == email).one()
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
 
     def test_anonymous_listing_with_bank_account(self):
@@ -66,7 +66,7 @@ class TestMerchantFlow(SystemTestCase):
 #        self.assertTrue(user.check_password('ab'))
 
         # check in balanced
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
         self.assertTrue(
             [ba for ba in account.bank_accounts if bank_account.id in ba.href]
@@ -88,7 +88,7 @@ class TestMerchantFlow(SystemTestCase):
         # check in balanced
         user = User.query.filter(
             User.email == email).one()
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
         self.assertTrue(
             [ba for ba in account.bank_accounts if bank_account.id in ba.href]
@@ -130,7 +130,7 @@ class TestMerchantFlow(SystemTestCase):
 #        self.assertTrue(user.check_password('ab'))
 
         # check in balanced
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
         self.assertEqual(ogaccount.href, account.href)
 
@@ -158,6 +158,6 @@ class TestMerchantFlow(SystemTestCase):
 #        self.assertTrue(user.check_password('ab'))
 
         # check in balanced
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
         self.assertEqual(ogaccount.href, account.href)

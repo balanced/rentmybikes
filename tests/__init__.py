@@ -28,7 +28,7 @@ class ControllerTestCase(TestCase):
     @classmethod
     def setUpClass(cls):
         super(ControllerTestCase, cls).setUpClass()
-        balanced.configure('17ca08eca7a211e2ac83026ba7cac9da')
+        balanced.configure(cls.config['BALANCED_SECRET'])
         cls.marketplace = balanced.Marketplace.mine
 
     def setUp(self):

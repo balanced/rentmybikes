@@ -8,7 +8,7 @@ MarkupSafe==0.15
 SQLAlchemy==0.7.6
 WTForms==1.0.1
 Werkzeug==0.8.3
-balanced>=1.0.0
+balanced>=1.1,<1.2
 decorator==3.3.3
 iso8601==0.1.4
 wsgiref==0.1.2

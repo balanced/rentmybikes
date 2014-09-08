@@ -44,26 +44,26 @@ class ListingManager(object):
                 raise Exception('Password mismatch')
 
         if not user.account_href:
-            self.create_balanced_account(user, merchant_data=merchant_data)
+            self.create_balanced_customer(user, merchant_data=merchant_data)
         else:
             user.add_merchant(merchant_data)
 
         if bank_account_form.bank_account_href.data:
             bank_account = balanced.BankAccount.fetch(bank_account_form.bank_account_href.data)
-            bank_account.associate_to_customer(user.balanced_account.href)
+            bank_account.associate_to_customer(user.balanced_customer.href)
         return listing_id
 
-    def create_balanced_account(self, user, merchant_data):
+    def create_balanced_customer(self, user, merchant_data):
         # user does not yet have a Balanced account, we need to create
         # this here. this may raise an exception if the data is
         # incorrect or the email address is already associated with an
         # existing account.
         try:
-            user.create_balanced_account(merchant_data=merchant_data)
+            user.create_balanced_customer(merchant_data=merchant_data)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
                 'email' in ex.description):
-                user.associate_balanced_account()
+                user.associate_balanced_customer()
                 user.add_merchant(merchant_data)
             else:
                 raise
@@ -99,7 +99,7 @@ def index(listing_form=None, guest_listing_form=None,
 
     if (request.user.is_authenticated and
         request.user.account_href and
-        request.user.balanced_account.merchant_status == 'underwritten'):
+        request.user.balanced_customer.merchant_status == 'underwritten'):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 

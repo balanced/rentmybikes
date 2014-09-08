@@ -18,7 +18,7 @@ class Listing(Base):
 
     def rent_to(self, user, card_href=None):
         # Fetch the buyer
-        buyer = user.balanced_account
+        buyer = user.balanced_customer
 
         # Fetch the buyers card to debit
         if card_href:
@@ -34,7 +34,7 @@ class Listing(Base):
 
         # Fetch the merchant
         owner_user = User.query.get(self.owner_guid)
-        owner = owner_user.balanced_account
+        owner = owner_user.balanced_customer
 
         # create an Order
         order = owner.create_order(desciption=self.bike_type)

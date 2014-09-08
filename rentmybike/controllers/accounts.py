@@ -33,7 +33,7 @@ def login(**kwargs):
         if not user:
             flash('Wrong email address or password', 'error')
             return login_show(login_form)
-        user.lookup_balanced_account()
+        user.lookup_balanced_customer()
         Session.commit()
         session['user_guid'] = user.guid
         return redirect(request.args.get('redirect_uri',
@@ -75,7 +75,7 @@ def create(**kwargs):
             flash('This account already exists!', 'warning')
             Session.rollback()
         else:
-            user.lookup_balanced_account()
+            user.lookup_balanced_customer()
             Session.commit()
             session['user_guid'] = user.guid
             return redirect(url_for('accounts.index'))
@@ -105,7 +105,7 @@ def verify():
             raise
     if account:
         user = User.create_guest_user(email=email)
-        user.associate_balanced_account(account.href)
+        user.associate_balanced_customer(account.href)
         Session.commit()
         session['email'] = email
     return redirect(url_for('listing.complete', listing=listing_id))

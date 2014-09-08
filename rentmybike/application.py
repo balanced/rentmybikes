@@ -87,7 +87,7 @@ class RentMyBike(Flask):
             name='Dummy User', email=self.dummy_email_generator(),
             password='password')
         Session.add(user)
-        user.create_balanced_account()
+        user.create_balanced_customer()
 
         for i in range(4):
             listing = Listing.query.filter(Listing.id == i + 1).count()

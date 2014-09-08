@@ -49,7 +49,7 @@ class User(Base):
         return True if self.has_password else False
 
     @property
-    def balanced_account(self):
+    def balanced_customer(self):
         if self.account_href:
             return balanced.Customer.fetch(self.account_href)
 
@@ -71,7 +71,7 @@ class User(Base):
                 Session.commit()
         return user
 
-    def create_balanced_account(self, card_href=None,
+    def create_balanced_customer(self, card_href=None,
                                 merchant_data=None):
         if self.account_href:
             raise Exception('User already has a balanced account')
@@ -79,7 +79,7 @@ class User(Base):
             account = self._create_balanced_buyer(card_href)
         else:
             account = self._create_balanced_merchant(merchant_data)
-        self.associate_balanced_account(account.href)
+        self.associate_balanced_customer(account.href)
         return account
 
     def _create_balanced_buyer(self, card_href):
@@ -102,7 +102,7 @@ class User(Base):
                                         merchant=merchant_data).save()
         return account
 
-    def lookup_balanced_account(self):
+    def lookup_balanced_customer(self):
         if self.account_href:
             return
         try:
@@ -112,7 +112,7 @@ class User(Base):
         else:
             self.account_href = account.href
 
-    def associate_balanced_account(self, account_href=None):
+    def associate_balanced_customer(self, account_href=None):
         """
         Assign a Balanced account_href to a user. This will check that the
         email addresses within balanced and our local system match first. It
@@ -150,7 +150,7 @@ class User(Base):
     def add_merchant(self, merchant_data):
         address_fields = ['city', 'line1', 'line2', 'state', 'postal_code',
                           'country_code']
-        customer_resource = self.balanced_account
+        customer_resource = self.balanced_customer
         for field in merchant_data:
             if field in address_fields:
                 customer_resource.address[field] = merchant_data[field]

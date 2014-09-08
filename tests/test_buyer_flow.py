@@ -61,7 +61,7 @@ class TestBuyerFlow(SystemTestCase):
         rentals = Rental.query.filter(Rental.buyer_guid == user.guid).all()
 
         # check in balanced
-        account = user.balanced_account
+        account = user.balanced_customer
         self.assertEqual(account.email, email)
         transaction_sum = sum(h.amount for h in account.card_holds)
         expected_sum = sum(r.bike.price for r in rentals) * 100

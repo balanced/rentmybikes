@@ -32,7 +32,7 @@ class RentalManager(object):
 
         Session.flush()  # ensure there is no db inconsistency
         if not user.account_href:
-            self.create_balanced_account(user, card_href)
+            self.create_balanced_customer(user, card_href)
         else:
             if card_href:
                 user.add_card(card_href)
@@ -40,17 +40,17 @@ class RentalManager(object):
         Session.flush()  # ensure there is no db inconsistency
         return listing.rent_to(user, card_href)
 
-    def create_balanced_account(self, user, card_href):
+    def create_balanced_customer(self, user, card_href):
         # user does not yet have a Balanced account, we need to create
         # this here. this may raise an exception if the data is
         # incorrect or the email address is already associated with an
         # existing account.
         try:
-            user.create_balanced_account(card_href=card_href)
+            user.create_balanced_customer(card_href=card_href)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
                 'email' in ex.description):
-                user.associate_balanced_account()
+                user.associate_balanced_customer()
             else:
                 raise ex
 
@@ -74,7 +74,7 @@ def show(listing, purchase_form=None, guest_purchase_form=None, force_form=False
     if (not force_form and
         request.user.is_authenticated and
         request.user.account_href and
-        'buyer' in request.user.balanced_account.roles):
+        'buyer' in request.user.balanced_customer.roles):
         is_buyer = True
         purchase_form = None
         guest_purchase_form = None
