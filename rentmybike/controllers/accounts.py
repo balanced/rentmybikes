@@ -94,7 +94,8 @@ def verify():
     marketplace = balanced.Marketplace.my_marketplace
 
     try:
-        account = balanced.Customer(email=email, merchant_href=merchant_href)
+        account = balanced.Customer(
+            email=email, merchant_href=merchant_href).save()
     except balanced.exc.HTTPError as ex:
         # shit, that sucked
         if getattr(ex, 'category_code', None) == 'duplicate-email-address':

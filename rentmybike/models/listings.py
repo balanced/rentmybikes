@@ -17,24 +17,52 @@ class Listing(Base):
     __table__ = listings
 
     def rent_to(self, user, card_href=None):
-        account = user.balanced_account
+        # Fetch the buyer
+        buyer = user.balanced_account
 
+        # Fetch the buyers card to debit
         if card_href:
             card = balanced.Card.fetch(card_href)
         else:
-            if not account.cards.count():
+            if not buyer.cards.count():
                 raise Exception('No card on file')
             if not user.has_password:
                 raise Exception('Anonymous users must specify a card')
             else:
-                card = account.cards.first()
+                card = buyer.cards.first()
 
-        # this will throw balanced.exc.HTTPError if it fails
 
-        debit = card.debit(self.price * 100)
+        # Fetch the merchant
+        owner_user = User.query.get(self.owner_guid)
+        owner = owner_user.balanced_account
 
-        rental = Rental(buyer_guid=user.guid,
-            debit_href=debit.href, bike_guid=self.id)
+        # create an Order
+        order = owner.create_order(desciption=self.bike_type)
+
+        # debit the buyer for the amount of the listing
+        debit = order.debit_from(
+            source=card,
+            amount=(self.price * 100),
+            appears_on_statement_as=self.bike_type,
+        )
+
+        # credit the owner of bicycle for the amount of listing
+        #
+        # since this is an example, we're showing how to issue a credit
+        # immediately. normally you should wait for order fulfillment
+        # before crediting.
+        # First, fetch the onwer's bank account to credit
+        bank_account = owner.bank_accounts.first()
+        if not bank_account:
+            raise Exception('No bank account on file')
+
+        order.credit_to(
+            destination=bank_account,
+            amount=(self.price * 100),
+        )
+
+        rental = Rental(buyer_guid=user.guid, order_href=order.href,
+                        listing_guid=self.id, owner_guid=owner_user.guid)
 
         Session.add(rental)
         return rental
@@ -98,4 +126,4 @@ class Rental(Base):
 
     @property
     def bike(self):
-        return Listing.query.get(self.bike_guid)
+        return Listing.query.get(self.listing_guid)

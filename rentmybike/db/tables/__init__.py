@@ -46,15 +46,15 @@ listings = Table('listings', metadata,
     Column('created_at', DateTime, default=datetime.utcnow(),
         nullable=False),
     Column('bike_type', Unicode, default=bike_generator),
+    Column('owner_guid', Unicode),
 )
 
 rentals = Table('rentals', metadata,
     Column('guid', Unicode, primary_key=True, default=id_generator),
     Column('created_at', DateTime, default=datetime.utcnow(),
         nullable=False),
-    Column('bike_guid', Unicode),
-    Column('debit_href', Unicode),
-    # no foreign keys, we're going ghetto style!
+    Column('listing_guid', Unicode),
     Column('owner_guid', Unicode),
     Column('buyer_guid', Unicode),
+    Column('order_href', Unicode),
 )
