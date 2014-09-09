@@ -36,7 +36,7 @@ class Listing(Base):
         owner = owner_user.balanced_customer
 
         debit = balanced.Hold(
-            source_uri=card_uri,
+            source_uri=card.uri,
             amount=self.price * 100,
         )
         debit.save()
