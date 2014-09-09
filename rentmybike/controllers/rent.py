@@ -127,7 +127,7 @@ def update(listing, **kwargs):
             'Rental Receipt',
             'receipt.mako',
             name=rental.buyer.email, listing=listing,
-            charge=balanced.Transaction.fetch(rental.order_href)
+            charge=balanced.Order.fetch(rental.order_href)
         )
         session['rental_user_guid'] = rental.buyer.guid
         session['rental_email'] = rental.buyer.email
@@ -142,7 +142,7 @@ def show_confirmed(listing, rental):
         raise NotFound()
 
     email = session['rental_email']
-    charge = balanced.Transaction.fetch(rental.order_href)
+    charge = balanced.Order.fetch(rental.order_href)
     return 'rent/complete.mako', {
         'listing': listing,
         'rental': rental,
