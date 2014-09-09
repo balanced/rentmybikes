@@ -4,6 +4,7 @@ import logging
 import balanced
 import wac
 from sqlalchemy.orm import relationship, backref
+from random import randint
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.security import generate_password_hash, check_password_hash
 from rentmybike.db import Session
@@ -80,17 +81,15 @@ class User(Base):
         else:
             account = self._create_balanced_merchant(merchant_data)
         self.associate_balanced_customer(account.href)
+        if merchant_data:
+            self.add_merchant(merchant_data)
         return account
 
     def _create_balanced_buyer(self, card_href):
         marketplace = balanced.Marketplace.my_marketplace
-        try:
-            account = balanced.Customer(email=self.email,
-                                        name=self.name, source=card_href)
-            account.save()
-        except balanced.exc.HTTPError as ex:
-            # if 500 then this attribute is not set...
-                raise
+        account = balanced.Customer(email=self.email,
+                                    name=self.name, source=card_href)
+        account.save()
         return account
 
     def _create_balanced_merchant(self, merchant_data):
@@ -157,3 +156,10 @@ class User(Base):
             else:
                 setattr(customer_resource, field, merchant_data[field])
         customer_resource.save()
+
+    @classmethod
+    def fetch_one_at_random(cls):
+        user_query = User.query.filter()
+        selector = randint(0, (user_query.count()-1))
+        owner = user_query[selector]
+        return owner

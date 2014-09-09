@@ -55,18 +55,7 @@ class ListingManager(object):
 
     def create_balanced_customer(self, user, merchant_data):
         # user does not yet have a Balanced account, we need to create
-        # this here. this may raise an exception if the data is
-        # incorrect or the email address is already associated with an
-        # existing account.
-        try:
-            user.create_balanced_customer(merchant_data=merchant_data)
-        except balanced.exc.HTTPError as ex:
-            if (ex.status_code == 409 and
-                'email' in ex.description):
-                user.associate_balanced_customer()
-                user.add_merchant(merchant_data)
-            else:
-                raise
+        user.create_balanced_customer(merchant_data=merchant_data)
 
     def _associate_email_and_account(self, email, account_href):
         if request.user.is_authenticated:
