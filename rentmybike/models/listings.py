@@ -18,15 +18,19 @@ class Listing(Base):
 
     def rent_to(self, user, card_uri=None):
 
-        account = user.balanced_customer
-
-        if not card_uri:
-            if not account.cards.count():
+        buyer = user.balanced_customer
+        if card_uri:
+            card = balanced.Card.find(card_uri)
+        else:
+            if not buyer.cards.count():
                 raise Exception('No card on file')
             if not user.has_password:
                 raise Exception('Anonymous users must specify a card')
+            else:
+                card = buyer.source
 
         # this will throw balanced.exc.HTTPError if it fails
+
         debit = balanced.Hold(
             source_uri=card_uri,
             amount=self.price * 100,

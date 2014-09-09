@@ -90,20 +90,13 @@ class User(Base):
             account.save()
         except balanced.exc.HTTPError as ex:
             # if 500 then this attribute is not set...
-            if getattr(ex, 'category_code', None) == 'duplicate-email-address':
-                # account already exists, let's upsert
-                account = marketplace.accounts.filter(
-                    email=self.email).one()
-                account.add_card(card_uri)
-            else:
-                raise
+            raise
         return account
 
     def _create_balanced_merchant(self, merchant_data):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = balanced.Customer.query.filter(
-                email=self.email).one()
+            account = balanced.Customer.query.filter(email=self.email).one()
         except balanced.exc.NoResultFound as ex:
             account = balanced.Customer(email=self.email, name=self.name,
                                         merchant=merchant_data).save()

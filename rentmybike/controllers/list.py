@@ -99,7 +99,7 @@ def index(listing_form=None, guest_listing_form=None,
 
     if (request.user.is_authenticated and
         request.user.account_uri and
-        'merchant' in request.user.balanced_customer.roles):
+        request.user.balanced_customer.is_identity_verified is True):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 

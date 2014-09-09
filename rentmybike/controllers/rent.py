@@ -70,10 +70,8 @@ def show(listing, purchase_form=None, guest_purchase_form=None, force_form=False
     # if this user is authenticated, then check if they have a Balanced
     # account with the role buyer. if they do then we give them the option
     # to charge this account without entering their card details.
-    if (not force_form and
-        request.user.is_authenticated and
-        request.user.account_uri and
-        'buyer' in request.user.balanced_customer.roles):
+    if (not force_form and request.user.is_authenticated and request.user.account_uri and
+        request.user.guid == listing.owner_guid):
         is_buyer = True
         purchase_form = None
         guest_purchase_form = None

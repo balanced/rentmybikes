@@ -66,14 +66,14 @@
     var csrf = '${ session.get('_csrf_token') }';
     var marketplaceUri = '${ marketplace_uri }';
     //  kick everything off when jquery is ready
-    $(function () {
+    $(  document ).ready(function () {
         rentmybike.init({
             csrfToken:csrf,
             marketplaceUri:marketplaceUri
         });
     });
 </script>
-</%def>
+</%def>d
 
 <%def name="messages()">
 <%

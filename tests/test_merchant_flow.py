@@ -15,7 +15,7 @@ email_generator = email_generator()
 class TestMerchantFlow(SystemTestCase):
 
     def test_anonymous_listing(self):
-        email = 'krusty@balancedpayments.com'
+        email = 'krusty2@balancedpayments.com'
         payload = self._guest_listing_payload(email)
         resp = self.client.post('/list', data=payload)
         self.assertEqual(resp.status_code, 302)
@@ -141,9 +141,9 @@ class TestMerchantFlow(SystemTestCase):
             expiration_year=2020,
             security_code=123
         ).save()
-        ogaccount = balanced.Marketplace.my_marketplace.create_buyer(
-            email, card.uri,
-        )
+        ogaccount = balanced.Customer(
+            email=email, source=card.uri,
+        ).save()
 
         payload = self._guest_listing_payload(email)
         resp = self.client.post('/list', data=payload)
