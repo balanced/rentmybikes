@@ -17,12 +17,12 @@ class RentalManager(object):
         super(RentalManager, self).__init__()
         self.request = request
 
-    def rent(self, listing, email_address, card_uri, name=None):
+    def rent(self, listing, email, card_uri, name=None):
         Session.flush()
         if request.user.is_authenticated:
             user = request.user
         else:
-            user = User.create_guest_user(email_address, name)
+            user = User.create_guest_user(email, name)
 
             # this user has not authenticated with their email/password combo
             # we cannot allow them to charge an existing card if it exists
@@ -31,7 +31,7 @@ class RentalManager(object):
 
         Session.flush()  # ensure there is no db inconsistency
         if not user.account_uri:
-            self.create_balanced_account(user, card_uri)
+            self.create_balanced_customer(user, card_uri)
         else:
             if card_uri:
                 user.add_card(card_uri)
@@ -39,17 +39,17 @@ class RentalManager(object):
         Session.flush()  # ensure there is no db inconsistency
         return listing.rent_to(user, card_uri)
 
-    def create_balanced_account(self, user, card_uri):
+    def create_balanced_customer(self, user, card_uri):
         # user does not yet have a Balanced account, we need to create
         # this here. this may raise an exception if the data is
         # incorrect or the email address is already associated with an
         # existing account.
         try:
-            user.create_balanced_account(card_uri=card_uri)
+            user.create_balanced_customer(card_uri=card_uri)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
-                'email_address' in ex.description):
-                user.associate_balanced_account()
+                'email' in ex.description):
+                user.associate_balanced_customer()
             else:
                 raise ex
 
@@ -73,7 +73,7 @@ def show(listing, purchase_form=None, guest_purchase_form=None, force_form=False
     if (not force_form and
         request.user.is_authenticated and
         request.user.account_uri and
-        'buyer' in request.user.balanced_account.roles):
+        'buyer' in request.user.balanced_customer.roles):
         is_buyer = True
         purchase_form = None
         guest_purchase_form = None
@@ -105,13 +105,13 @@ def update(listing, **kwargs):
     name = None
 
     if request.user.is_authenticated:
-        email_address = request.user.email_address
+        email_address = request.user.email
     else:
-        email_address = guest_purchase_form.email_address.data
+        email_address = guest_purchase_form.email.data
         name = guest_purchase_form.name.data
 
     try:
-        rental = manager.rent(listing, email_address, card_uri, name)
+        rental = manager.rent(listing,  email_address, card_uri, name)
     except balanced.exc.HTTPError as ex:
         msg = 'Error debiting account, your card has not been charged "{}"'
         flash(msg.format(ex.message), 'error')
@@ -123,14 +123,14 @@ def update(listing, **kwargs):
     else:
         Session.commit()
 
-        email.send_email(rental.buyer.email_address,
+        email.send_email(rental.buyer.email,
             'Rental Receipt',
             'receipt.mako',
-            name=rental.buyer.email_address, listing=listing,
+            name=rental.buyer.email, listing=listing,
             charge=balanced.Transaction.find(rental.debit_uri)
         )
         session['rental_user_guid'] = rental.buyer.guid
-        session['rental_email_address'] = rental.buyer.email_address
+        session['rental_email'] = rental.buyer.email
         return redirect(url_for('rent.confirmed', listing=listing, rental=rental))
     return show(listing, purchase_form, guest_purchase_form)
 
@@ -139,11 +139,11 @@ def update(listing, **kwargs):
 def show_confirmed(listing, rental):
     if rental.buyer_guid != session['rental_user_guid']:
         raise NotFound()
-    email_address = session['rental_email_address']
+    email = session['rental_email']
     charge = balanced.Transaction.find(rental.debit_uri)
     return 'rent/complete.mako', {
         'listing': listing,
         'rental': rental,
         'charge': charge,
-        'email_address': email_address,
+        'email': email,
         }

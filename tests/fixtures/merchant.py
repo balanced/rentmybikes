@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
 
-def balanced_merchant_payload(email_address):
+def balanced_merchant_payload(email):
     return {
-        'email_address': email_address,
+        'email': email,
         'merchant': {
             'type': 'person',
-            'email_address': email_address,
+            'email': email,
             'name': 'Krusty the Klown',
             'street_address': '801 High St',
             'postal_code': '94301',

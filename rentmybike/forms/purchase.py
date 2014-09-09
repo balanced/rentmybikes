@@ -54,14 +54,14 @@ class PurchaseForm(CreditCardForm):
     Account.
     """
     name = HiddenField(validators=[validators.Required()])
-    email_address = HiddenField(validators=[validators.Required(),
+    email = HiddenField(validators=[validators.Required(),
                                             validators.Email()])
     card_uri = HiddenField(validators=[validators.Required()])
 
 
 class GuestPurchaseForm(PurchaseForm):
     name = TextField('Name', [validators.Required()])
-    email_address = TextField('Email', [validators.Required(),
+    email = TextField('Email', [validators.Required(),
                                         validators.Email()])
 
 
@@ -72,7 +72,7 @@ class ListingForm(Form):
     type = HiddenField(default='person')
     listing_id = HiddenField()
     name = HiddenField()
-    email_address = HiddenField()
+    email = HiddenField()
     street_address = TextField('Home Address', [validators.Required()])
     postal_code = TextField('Zip Code', [validators.Required()])
     phone_number = TextField('Phone Number', [validators.Required()])
@@ -89,7 +89,7 @@ class GuestListingForm(ListingForm):
     Used when listing a bike with an anonymous user
     """
     name = TextField('Name', [validators.Required()])
-    email_address = TextField('Email', [validators.Required(),
+    email = TextField('Email', [validators.Required(),
                                         validators.Email()])
     # Matin told me to comment this out.
     # password = PasswordField('Password', [validators.Required()])

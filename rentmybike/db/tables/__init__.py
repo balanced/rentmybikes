@@ -35,7 +35,7 @@ users = Table('users', metadata,
     Column('password_hash', Unicode),
     Column('has_password', Boolean, default=False, nullable=False),
     Column('name', Unicode),
-    Column('email_address', Unicode, nullable=False, unique=True),
+    Column('email', Unicode, nullable=False, unique=True),
 
     # balanced uri of the Balanced account
     Column('account_uri', Unicode),
@@ -46,13 +46,14 @@ listings = Table('listings', metadata,
     Column('created_at', DateTime, default=datetime.utcnow(),
         nullable=False),
     Column('bike_type', Unicode, default=bike_generator),
-)
+    Column('owner_guid', Unicode),
+    )
 
 rentals = Table('rentals', metadata,
     Column('guid', Unicode, primary_key=True, default=id_generator),
     Column('created_at', DateTime, default=datetime.utcnow(),
         nullable=False),
-    Column('bike_guid', Unicode),
+    Column('listing_guid', Unicode),
     Column('debit_uri', Unicode),
     # no foreign keys, we're going ghetto style!
     Column('owner_guid', Unicode),

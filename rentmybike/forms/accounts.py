@@ -12,7 +12,7 @@ __all__ = [
 
 
 class LoginForm(Form):
-    email_address = TextField('Email', [validators.Required(),
+    email = TextField('Email', [validators.Required(),
                                         validators.Email()])
     password = PasswordField('Password', [validators.Required()])
 
@@ -22,7 +22,7 @@ class LoginForm(Form):
 
 class AccountForm(Form):
     name = TextField('Name', [validators.Required()])
-    email_address = TextField('Email', [validators.Required(),
+    email = TextField('Email', [validators.Required(),
                                         validators.Email()])
     password = PasswordField('Password', [validators.Required()])
 

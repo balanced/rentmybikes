@@ -20,7 +20,7 @@ class ListingManager(object):
 
     def create(self, form, bank_account_form):
         listing_id = form.listing_id.data
-        email_address = form.email_address.data
+        email = form.email.data
         name = form.name.data
         merchant_data = form.data.copy()
         password = merchant_data.pop('password', None)
@@ -28,13 +28,13 @@ class ListingManager(object):
         year = merchant_data.pop('date_of_birth_year')
         merchant_data['dob'] = '{}-{}'.format(year, month)
         merchant_data.pop('listing_id')
-        if not merchant_data.get('email_address', None):
-            merchant_data.pop('email_address', None)
+        if not merchant_data.get('email', None):
+            merchant_data.pop('email', None)
 
         if request.user.is_authenticated:
             user = request.user
         else:
-            user = User.create_guest_user(email_address, name, password)
+            user = User.create_guest_user(email, name, password)
             # do this password check as a guest user should not be able to take
             # over an existing account without authentication
             # flush to ensure password gets hashed
@@ -43,37 +43,37 @@ class ListingManager(object):
                 raise Exception('Password mismatch')
 
         if not user.account_uri:
-            self.create_balanced_account(user, merchant_data=merchant_data)
+            self.create_balanced_customer(user, merchant_data=merchant_data)
         else:
             user.add_merchant(merchant_data)
 
         if bank_account_form.bank_account_uri.data:
-            user.balanced_account.add_bank_account(
+            user.balanced_customer.add_bank_account(
                 bank_account_form.bank_account_uri.data)
 
         return listing_id
 
-    def create_balanced_account(self, user, merchant_data):
+    def create_balanced_customer(self, user, merchant_data):
         # user does not yet have a Balanced account, we need to create
         # this here. this may raise an exception if the data is
         # incorrect or the email address is already associated with an
         # existing account.
         try:
-            user.create_balanced_account(merchant_data=merchant_data)
+            user.create_balanced_customer(merchant_data=merchant_data)
         except balanced.exc.HTTPError as ex:
             if (ex.status_code == 409 and
-                'email_address' in ex.description):
-                user.associate_balanced_account()
+                'email' in ex.description):
+                user.associate_balanced_customer()
                 user.add_merchant(merchant_data)
             else:
                 raise
 
-    def _associate_email_and_account(self, email_address, account_uri):
+    def _associate_email_and_account(self, email, account_uri):
         if request.user.is_authenticated:
             user = request.user
         else:
             # we're creating an account as they list, create a guest user.
-            user = User.create_guest_user(email_address)
+            user = User.create_guest_user(email)
             # flush to db, to force guid creation as we're about to log them
             # in.
             Session.flush()
@@ -99,7 +99,7 @@ def index(listing_form=None, guest_listing_form=None,
 
     if (request.user.is_authenticated and
         request.user.account_uri and
-        'merchant' in request.user.balanced_account.roles):
+        'merchant' in request.user.balanced_customer.roles):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 
@@ -136,7 +136,7 @@ def create(**kwargs):
         form = listing_form
     else:
         form = guest_listing_form
-        session['email_address'] = form.email_address.data
+        session['email'] = form.email.data
 
     if not form.validate():
         return index(**kwargs)
@@ -151,7 +151,7 @@ def create(**kwargs):
             return redirect(url_for('redirect.show',
                 listing=form.listing_id.data,
                 redirect_uri=ex.response.headers['location'],
-                email_address=session.get('email_address')))
+                email=session.get('email')))
         elif ex.status_code == 400:
             if 'merchant.postal_code' in ex.description:
                 form['postal_code'].errors.append(ex.description)
@@ -192,12 +192,12 @@ def confirm(listing):
 def complete(listing):
     listing = Listing.query.get(listing.id)
     if request.user.is_authenticated:
-        email_address = request.user.email_address
+        email = request.user.email
     else:
-        email_address = session['email_address']
+        email = session['email']
     return 'list/complete.mako', {
         'listing': listing,
-        'email_address': email_address,
+        'email': email,
         }
 
 
@@ -210,7 +210,7 @@ def interstitial(listing_id):
         'redirect_uri': '{}/account/verify?listing_id={}'.format(
             current_app.config['DOMAIN_URI'], listing_id),
         'application_type': 'person',
-        'email_address': request.args.get('email_address'),
+        'email': request.args.get('email'),
     }
     redirect_to = (redirect_uri + '?' + urllib.urlencode(query))
 

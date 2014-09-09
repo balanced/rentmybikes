@@ -38,7 +38,7 @@ ${ utils.bike(listing, hide_button=True) }
 ${ utils.render_field(form.type) }
 ${ utils.render_field(form.listing_id) }
 ${ utils.render_field(form.name, class_='span5', autofocus="autofocus") }
-${ utils.render_field(form.email_address, class_='span5') }
+${ utils.render_field(form.email, class_='span5') }
 % if hasattr(form, 'password'):
 ${ utils.render_field(form.password, class_='span5') }
 % endif

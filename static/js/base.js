@@ -42,14 +42,14 @@
         }
 
         var name = $('[name$="name"]', $form).val();
-        var emailAddress = $('[name$="email_address"]', $form).val();
+        var emailAddress = $('[name$="email"]', $form).val();
 
         //  validate form
         if (!name) {
             addErrorToField($form, 'name');
         }
         if (!balanced.emailAddress.validate(emailAddress)) {
-            addErrorToField($form, 'email_address');
+            addErrorToField($form, 'email');
         }
         if (!balanced.card.isCardNumberValid(cardData.card_number)) {
             addErrorToField($form, 'card_number');
@@ -135,8 +135,8 @@
             addErrorToField($form, 'name');
         }
 
-        if (!balanced.emailAddress.validate(merchantData.email_address)) {
-            addErrorToField($form, 'email_address');
+        if (!balanced.emailAddress.validate(merchantData.email)) {
+            addErrorToField($form, 'email');
         }
 
         if (!merchantData.street_address) {

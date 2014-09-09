@@ -3,6 +3,7 @@ import logging
 
 from sqlalchemy.orm.exc import NoResultFound
 
+import balanced
 from rentmybike.db import Session
 from rentmybike.db.tables import listings, rentals
 from rentmybike.models import Base, User
@@ -17,7 +18,7 @@ class Listing(Base):
 
     def rent_to(self, user, card_uri=None):
 
-        account = user.balanced_account
+        account = user.balanced_customer
 
         if not card_uri:
             if not account.cards.count():
@@ -26,10 +27,14 @@ class Listing(Base):
                 raise Exception('Anonymous users must specify a card')
 
         # this will throw balanced.exc.HTTPError if it fails
-        debit = account.hold(self.price * 100, source_uri=card_uri)
+        debit = balanced.Hold(
+            source_uri=card_uri,
+            amount=self.price * 100,
+        )
+        debit.save()
 
         rental = Rental(buyer_guid=user.guid,
-            debit_uri=debit.uri, bike_guid=self.id)
+            debit_uri=debit.uri, listing_guid=self.id)
 
         Session.add(rental)
         return rental
@@ -93,4 +98,4 @@ class Rental(Base):
 
     @property
     def bike(self):
-        return Listing.query.get(self.bike_guid)
+        return Listing.query.get(self.listing_guid)

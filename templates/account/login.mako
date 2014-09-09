@@ -7,7 +7,7 @@
         <div class="span6 offset1">
             <form method="POST">
                 ${ utils.csrf_token_input() | n }
-                ${ utils.render_field(login_form.email_address, class_='span5', autofocus='autofocus') }
+                ${ utils.render_field(login_form.email, class_='span5', autofocus='autofocus') }
                 ${ utils.render_field(login_form.password, class_='span5') }
                 <div class="actions">
                     <button class="btn btn-inverse">log in</button> <a href="${ url_for('new.index') }" class="btn">create a new account</a>
