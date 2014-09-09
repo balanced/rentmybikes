@@ -46,7 +46,7 @@ ${ utils.render_field(form.street_address, class_='span5') }
 ${ utils.render_field(form.postal_code, class_='span2') }
 ${ utils.render_field(form.state) }
 ${ utils.render_field(form.country_code) }
-${ utils.render_field(form.phone_number, class_='span4') }
+${ utils.render_field(form.phone, class_='span4') }
 <div class="control-group">
     <label for="date_of_birth_month">Date of Birth</label>
     ${ form.date_of_birth_month(class_='span1') }

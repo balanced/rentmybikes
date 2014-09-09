@@ -12,7 +12,7 @@ def balanced_merchant_payload(email):
             'postal_code': '94301',
             'country_code': 'USA',
             'dob': '1980-05-01',
-            'phone_number': '9046281796',
+            'phone': '9046281796',
             'production': False,
             }
     }

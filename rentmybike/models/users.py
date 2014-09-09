@@ -80,17 +80,15 @@ class User(Base):
         else:
             account = self._create_balanced_merchant(merchant_data)
         self.associate_balanced_customer(account.uri)
+        if merchant_data:
+            self.add_merchant(merchant_data)
         return account
 
     def _create_balanced_buyer(self, card_uri):
         marketplace = balanced.Marketplace.my_marketplace
-        try:
-            account = balanced.Customer(email=self.email,
-                name=self.name, card_uri=card_uri)
-            account.save()
-        except balanced.exc.HTTPError as ex:
-            # if 500 then this attribute is not set...
-            raise
+        account = balanced.Customer(email=self.email,
+            name=self.name, card_uri=card_uri)
+        account.save()
         return account
 
     def _create_balanced_merchant(self, merchant_data):
@@ -98,8 +96,7 @@ class User(Base):
         try:
             account = balanced.Customer.query.filter(email=self.email).one()
         except balanced.exc.NoResultFound as ex:
-            account = balanced.Customer(email=self.email, name=self.name,
-                                        merchant=merchant_data).save()
+            account = balanced.Customer(email=self.email, name=self.name, merchant=merchant_data).save()
         return account
 
     def lookup_balanced_customer(self):

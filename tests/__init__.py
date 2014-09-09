@@ -87,7 +87,7 @@ class SystemTestCase(ControllerTestCase):
             'guest-country_code': 'USA',
             'guest-date_of_birth_month': 5,
             'guest-date_of_birth_year': 1956,
-            'guest-phone_number': '9046281796',
+            'guest-phone': '9046281796',
             'guest-password': 'ab',
             }
 
@@ -107,7 +107,7 @@ class SystemTestCase(ControllerTestCase):
             'listing-country_code': 'USA',
             'listing-date_of_birth_month': 5,
             'listing-date_of_birth_year': 1956,
-            'listing-phone_number': '9046281796',
+            'listing-phone': '9046281796',
             }
 
     def _listing_payload_fail_kyc(self):

@@ -147,8 +147,8 @@
             addErrorToField($form, 'postal_code');
         }
 
-        if (!merchantData.phone_number) {
-            addErrorToField($form, 'phone_number');
+        if (!merchantData.phone) {
+            addErrorToField($form, 'phone');
         }
 
         var hasBankAccount = false;

@@ -75,7 +75,7 @@ class ListingForm(Form):
     email = HiddenField()
     street_address = TextField('Home Address', [validators.Required()])
     postal_code = TextField('Zip Code', [validators.Required()])
-    phone_number = TextField('Phone Number', [validators.Required()])
+    phone = TextField('Phone Number', [validators.Required()])
     country_code = HiddenField(default='USA')
     state = HiddenField()
     date_of_birth_month = SelectField('Month of Birth',

@@ -55,18 +55,7 @@ class ListingManager(object):
 
     def create_balanced_customer(self, user, merchant_data):
         # user does not yet have a Balanced account, we need to create
-        # this here. this may raise an exception if the data is
-        # incorrect or the email address is already associated with an
-        # existing account.
-        try:
-            user.create_balanced_customer(merchant_data=merchant_data)
-        except balanced.exc.HTTPError as ex:
-            if (ex.status_code == 409 and
-                'email' in ex.description):
-                user.associate_balanced_customer()
-                user.add_merchant(merchant_data)
-            else:
-                raise
+        user.create_balanced_customer(merchant_data=merchant_data)
 
     def _associate_email_and_account(self, email, account_uri):
         if request.user.is_authenticated:
@@ -99,7 +88,7 @@ def index(listing_form=None, guest_listing_form=None,
 
     if (request.user.is_authenticated and
         request.user.account_uri and
-        request.user.balanced_customer.is_identity_verified is True):
+        request.user.balanced_customer.is_identity_verified):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 
@@ -156,8 +145,8 @@ def create(**kwargs):
             if 'merchant.postal_code' in ex.description:
                 form['postal_code'].errors.append(ex.description)
                 return index(**kwargs)
-            elif 'merchant.phone_number' in ex.description:
-                form['phone_number'].errors.append(ex.description)
+            elif 'merchant.number' in ex.description:
+                form['number'].errors.append(ex.description)
                 return index(**kwargs)
         raise
     except Exception as ex:
