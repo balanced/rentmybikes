@@ -3,6 +3,7 @@ import logging
 
 import balanced
 from sqlalchemy.orm import relationship, backref
+from random import randint
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.security import generate_password_hash, check_password_hash
 from rentmybike.db import Session
@@ -154,3 +155,10 @@ class User(Base):
             else:
                 setattr(customer_resource, field, merchant_data[field])
         customer_resource.save()
+
+    @classmethod
+    def fetch_one_at_random(cls):
+        user_query = User.query.filter()
+        selector = randint(0, (user_query.count()-1))
+        owner = user_query[selector]
+        return owner

@@ -6,7 +6,6 @@ import traceback
 import balanced
 import string
 import random
-from random import randint
 from flask import Flask, request, Response, session
 from flaskext.mail import Mail
 from sqlalchemy.exc import InterfaceError
@@ -63,10 +62,12 @@ class RentMyBike(Flask):
             rv = render(template_name, request, **payload)
         return super(RentMyBike, self).make_response(rv)
 
-    def owner_generator(self):
-        user_query = User.query.filter()
-        selector = randint(0, (user_query.count()-1))
-        owner = user_query[selector]
+    def dummy_email_generator(
+            self, size=6, chars=string.ascii_letters + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size)) + \
+               '@gmail.com'
+
+    def dummy_bank_account_generator(self, owner):
         bank_account = balanced.BankAccount(
             routing_number='121000358',
             account_type='checking',
@@ -74,12 +75,6 @@ class RentMyBike(Flask):
             name='Johann Bernoulli'
         ).save()
         owner.balanced_customer.add_bank_account(bank_account.uri)
-        return owner.guid
-
-    def dummy_email_generator(
-            self, size=6, chars=string.ascii_letters + string.digits):
-        return ''.join(random.choice(chars) for _ in range(size)) + \
-               '@gmail.com'
 
     def add_dummy_data(self):
         user = User(
@@ -89,9 +84,12 @@ class RentMyBike(Flask):
         user.create_balanced_customer()
 
         for i in range(4):
+            owner = User.fetch_one_at_random()
+            if not user.balanced_customer.bank_accounts.count():
+                self.dummy_bank_account_generator(owner)
             listing = Listing.query.filter(Listing.id == i + 1).count()
             if not listing:
-                listing = Listing(id=i + 1, owner_guid=self.owner_generator())
+                listing = Listing(id=i + 1, owner_guid=owner.guid)
                 Session.add(listing)
 
         Session.commit()
