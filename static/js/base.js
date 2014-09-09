@@ -152,10 +152,10 @@
         }
 
         var hasBankAccount = false;
-        if (merchantData.account_number || merchantData.bank_code) {
+        if (merchantData.account_number || merchantData.routing_number) {
             hasBankAccount = true;
-            if (!balanced.bankAccount.validateRoutingNumber(merchantData.bank_code)) {
-                addErrorToField($form, 'bank_code');
+            if (!balanced.bankAccount.validateRoutingNumber(merchantData.routing_number)) {
+                addErrorToField($form, 'routing_number');
             }
             if (!merchantData.account_number) {
                 addErrorToField($form, 'account_number');

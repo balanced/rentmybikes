@@ -71,7 +71,7 @@ class SystemTestCase(ControllerTestCase):
             'account-email': email,
             'account-name': 'Bob Geldof',
             'account-password': 'ab',
-            }
+        }
         resp = self.client.post('/accounts/new', data=user_payload)
         self.assertEqual(resp.status_code, 302)
 

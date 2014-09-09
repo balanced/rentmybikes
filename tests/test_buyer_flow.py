@@ -94,8 +94,8 @@ class TestBuyerFlow(SystemTestCase):
         email = email_generator.next()
         # 1. create an account on balanced
         card_uri = self._card_payload()
-        balanced.Marketplace.my_marketplace.create_buyer(
-            email, card_uri=card_uri,
+        balanced.Customer(
+            email=email, card_uri=card_uri,
         )
 
         # 2. anonymous purchase using this account should work.
@@ -105,9 +105,10 @@ class TestBuyerFlow(SystemTestCase):
         email = email_generator.next()
         # 1. create an account on balanced
         payload = merchant_fixtures.balanced_merchant_payload(email)
-        balanced.Marketplace.my_marketplace.create_merchant(
-            email, merchant=payload['merchant'],
+        customer = balanced.Customer(
+            email=email, merchant=payload['merchant'],
         )
+        customer.save()
         # 2. anonymous purchase using this account should work.
         self.test_anonymous_purchase()
 

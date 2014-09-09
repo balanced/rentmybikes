@@ -18,6 +18,7 @@ class RentalManager(object):
         self.request = request
 
     def rent(self, listing, email, card_uri, name=None):
+
         Session.flush()
         if request.user.is_authenticated:
             user = request.user
@@ -70,7 +71,9 @@ def show(listing, purchase_form=None, guest_purchase_form=None, force_form=False
     # if this user is authenticated, then check if they have a Balanced
     # account with the role buyer. if they do then we give them the option
     # to charge this account without entering their card details.
-    if (not force_form and request.user.is_authenticated and request.user.account_uri and
+    if (not force_form and
+        request.user.is_authenticated and
+        request.user.account_uri and
         request.user.guid == listing.owner_guid):
         is_buyer = True
         purchase_form = None
@@ -109,7 +112,7 @@ def update(listing, **kwargs):
         name = guest_purchase_form.name.data
 
     try:
-        rental = manager.rent(listing,  email_address, card_uri, name)
+        rental = manager.rent(listing, email_address, card_uri, name)
     except balanced.exc.HTTPError as ex:
         msg = 'Error debiting account, your card has not been charged "{}"'
         flash(msg.format(ex.message), 'error')

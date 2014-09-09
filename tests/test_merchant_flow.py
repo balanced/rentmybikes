@@ -51,7 +51,7 @@ class TestMerchantFlow(SystemTestCase):
         email = email_generator.next()
         payload = self._guest_listing_payload(email)
         bank_account = balanced.BankAccount(name='Myata Marketplace',
-            account_number=321174851, bank_code=321174851
+            account_number=321174851, routing_number=321174851
         ).save()
         payload['bank_account_uri'] = bank_account.uri
         resp = self.client.post('/list', data=payload)
@@ -77,7 +77,7 @@ class TestMerchantFlow(SystemTestCase):
         self._create_user(email)
         payload = self._listing_payload()
         bank_account = balanced.BankAccount(name='Bob Saget',
-            account_number=321174851, bank_code=321174851
+            account_number=321174851, routing_number=321174851
         ).save()
         payload['bank_account_uri'] = bank_account.uri
         user = User.query.filter(User.email == email).one()

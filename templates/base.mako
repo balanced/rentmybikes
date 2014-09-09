@@ -73,7 +73,7 @@
         });
     });
 </script>
-</%def>d
+</%def>
 
 <%def name="messages()">
 <%

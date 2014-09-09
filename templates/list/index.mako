@@ -21,8 +21,8 @@ ${ utils.bike(listing, hide_button=True) }
                     <legend>Add your bank account <span>(optional)</span></legend>
                     ${ utils.render_field(bank_account_form.account_number) }
                     <div class="control-group">
-                        ${ bank_account_form.bank_code.label }
-                        ${ bank_account_form.bank_code } <span id="bank-code-result"></span>
+                        ${ bank_account_form.routing_number.label }
+                        ${ bank_account_form.routing_number } <span id="bank-code-result"></span>
                     </div>
                 </fieldset>
                 % endif

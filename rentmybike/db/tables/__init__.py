@@ -47,7 +47,7 @@ listings = Table('listings', metadata,
         nullable=False),
     Column('bike_type', Unicode, default=bike_generator),
     Column('owner_guid', Unicode),
-    )
+)
 
 rentals = Table('rentals', metadata,
     Column('guid', Unicode, primary_key=True, default=id_generator),

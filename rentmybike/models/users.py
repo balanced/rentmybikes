@@ -138,12 +138,11 @@ class User(Base):
         Adds a card to an account within Balanced.
         """
         try:
-            account = balanced.Customer.query.filter(
-                email=self.email).one()
+            account = balanced.Customer.query.filter(email=self.email).one()
         except balanced.exc.NoResultFound:
-            account = balanced.Marketplace.create_buyer(
+            account = balanced.Customer(
                 email=self.email, card_uri=card_uri,
-                name=self.name)
+                name=self.name).save()
         else:
             account.add_card(card_uri)
         return account
