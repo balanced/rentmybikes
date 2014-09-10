@@ -32,7 +32,7 @@ class AccountForm(Form):
 
 
 class BankAccountForm(Form):
-    bank_account_uri = HiddenField()
+    bank_account_href = HiddenField()
     routing_number = TextField('Routing Number',
         description='Enter your 9 digit routing number.')
     account_number = TextField('Account Number',

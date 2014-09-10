@@ -32,28 +32,28 @@ class TestBuyerFlow(SystemTestCase):
 
         self.session.flush()
 
-    def _rental_payload(self, card_uri=None):
-        if not card_uri:
-            card_uri = self._card_payload()
+    def _rental_payload(self, card_href=None):
+        if not card_href:
+            card_href = self._card_payload()
         return {
             '_csrf_token': self.get_csrf_token(),
-            'card_uri': card_uri,
+            'card_href': card_href,
             }
 
-    def _guest_rental_payload(self, email, card_uri=None):
-        payload = self._rental_payload(card_uri)
+    def _guest_rental_payload(self, email, card_href=None):
+        payload = self._rental_payload(card_href)
         payload['guest-name'] = 'Chimmy Changa'
         payload['guest-email'] = email
         return payload
 
     def _card_payload(self):
         card = balanced.Card(
-            card_number='4111111111111111',
+            number='4111111111111111',
             expiration_month=12,
             expiration_year=2020,
-            security_code=123
+            cvv=123
         ).save()
-        return card.uri
+        return card.href
 
     def _verify_buyer_transactions(self, email):
         user = User.query.filter(
@@ -63,7 +63,7 @@ class TestBuyerFlow(SystemTestCase):
         # check in balanced
         account = user.balanced_customer
         self.assertEqual(account.email, email)
-        transaction_sum = sum(h.amount for h in account.holds)
+        transaction_sum = sum(h.amount for h in account.card_holds)
         expected_sum = sum(r.bike.price for r in rentals) * 100
         self.assertEqual(transaction_sum, expected_sum)
 
@@ -93,20 +93,20 @@ class TestBuyerFlow(SystemTestCase):
     def test_anonymous_purchase_with_existing_buyer_account(self, *_):
         email = email_generator.next()
         # 1. create an account on balanced
-        card_uri = self._card_payload()
+        card_href = self._card_payload()
         balanced.Customer(
-            email=email, card_uri=card_uri,
+            email=email, source=card_href,
         )
 
         # 2. anonymous purchase using this account should work.
         self.test_anonymous_purchase()
 
-    def test_anonymous_purchase_with_existing_merchant_account(self, *_):
+    def test_anonymous_purchase_with_existing_customer_account(self, *_):
         email = email_generator.next()
         # 1. create an account on balanced
-        payload = merchant_fixtures.balanced_merchant_payload(email)
+        payload = merchant_fixtures.balanced_customer_payload(email)
         customer = balanced.Customer(
-            email=email, merchant=payload['merchant'],
+            email=email, merchant=payload['customer'],
         )
         customer.save()
         # 2. anonymous purchase using this account should work.
@@ -130,7 +130,7 @@ class TestBuyerFlow(SystemTestCase):
         self._rent(payload)
 
         payload = self._rental_payload()
-        payload.pop('card_uri')
+        payload.pop('card_href')
         self._rent(payload)
         self._verify_buyer_transactions(email)
 
@@ -148,14 +148,31 @@ class TestBuyerFlow(SystemTestCase):
         self.test_authenticated_purchase(email)
 
     @mock.patch('rentmybike.controllers.rent.RentalManager')
-    @mock.patch('rentmybike.controllers.rent.balanced.Transaction.find')
-    def test_failure_and_then_success(self, find, rentalmanager, *_):
+    @mock.patch('rentmybike.controllers.rent.balanced.Debit.fetch')
+    def test_failure_and_then_success(self, fetch, rentalmanager, *_):
         email = email_generator.next()
         payload = self._guest_rental_payload(email)
         self._populate_data()
-
+        
         manager = rentalmanager.return_value
-        manager.rent.side_effect = balanced.exc.HTTPError
+
+        http_mock = mock.Mock()
+        http_mock.response = mock.Mock()
+        http_mock.response.status_code = 400
+        http_mock.response.data = {"errors": [
+            {
+                "status": "Bad Request",
+                "category_code": "request",
+                "status_code": 400,
+                "category_type": "request",
+                "extras": {
+                    "routing_number": "Missing required field [routing_number]"
+                },
+                "request_id": "OHM8ede8fee2f9a11e4ab2502a1fe52a36c",
+                "description": "Missing required field [routing_number] Your request id is OHM8ede8fee2f9a11e4ab2502a1fe52a36c."
+            }
+        ]}
+        manager.rent.side_effect = balanced.exc.HTTPError(http_mock)
 
         resp = self.client.post('/rent/1', data=payload)
         self.assertEqual(resp.status_code, 201)

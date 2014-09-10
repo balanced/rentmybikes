@@ -40,12 +40,12 @@ class CreditCardForm(Form):
     """
     What we require in order to tokenize a card.
     """
-    card_number = TextField('Credit Card Number', [validators.Required()])
+    number = TextField('Credit Card Number', [validators.Required()])
     expiration_month = SelectField('Expiration Date', [validators.Required()],
         choices=months())
     expiration_year = SelectField('Expiration Year', [validators.Required()],
         choices=years())
-    security_code = TextField('Security Code', [validators.Required()])
+    cvv = TextField('Security Code', [validators.Required()])
 
 
 class PurchaseForm(CreditCardForm):
@@ -56,7 +56,7 @@ class PurchaseForm(CreditCardForm):
     name = HiddenField(validators=[validators.Required()])
     email = HiddenField(validators=[validators.Required(),
                                             validators.Email()])
-    card_uri = HiddenField(validators=[validators.Required()])
+    card_href = HiddenField(validators=[validators.Required()])
 
 
 class GuestPurchaseForm(PurchaseForm):
@@ -73,14 +73,14 @@ class ListingForm(Form):
     listing_id = HiddenField()
     name = HiddenField()
     email = HiddenField()
-    street_address = TextField('Home Address', [validators.Required()])
+    line1 = TextField('Home Address', [validators.Required()])
     postal_code = TextField('Zip Code', [validators.Required()])
     phone = TextField('Phone Number', [validators.Required()])
     country_code = HiddenField(default='USA')
     state = HiddenField()
-    date_of_birth_month = SelectField('Month of Birth',
+    dob_month = SelectField('Month of Birth',
         [validators.Required()], choices=months())
-    date_of_birth_year = SelectField('Year of Birth', [validators.Required()],
+    dob_year = SelectField('Year of Birth', [validators.Required()],
         choices=years(1900, date.today().year - 18))
 
 

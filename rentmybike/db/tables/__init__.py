@@ -37,8 +37,8 @@ users = Table('users', metadata,
     Column('name', Unicode),
     Column('email', Unicode, nullable=False, unique=True),
 
-    # balanced uri of the Balanced account
-    Column('account_uri', Unicode),
+    # balanced href of the Balanced account
+    Column('account_href', Unicode),
 )
 
 listings = Table('listings', metadata,
@@ -54,8 +54,8 @@ rentals = Table('rentals', metadata,
     Column('created_at', DateTime, default=datetime.utcnow(),
         nullable=False),
     Column('listing_guid', Unicode),
-    Column('debit_uri', Unicode),
-    # no foreign keys, we're going ghetto style!
+    Column('debit_href', Unicode),
     Column('owner_guid', Unicode),
     Column('buyer_guid', Unicode),
+    Column('debit_href', Unicode),
 )

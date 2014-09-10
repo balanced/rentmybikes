@@ -51,8 +51,8 @@
         if (!balanced.emailAddress.validate(emailAddress)) {
             addErrorToField($form, 'email');
         }
-        if (!balanced.card.isCardNumberValid(cardData.card_number)) {
-            addErrorToField($form, 'card_number');
+        if (!balanced.card.isCardNumberValid(cardData.number)) {
+            addErrorToField($form, 'number');
         }
         if (!balanced.card.isExpiryValid(cardData.expiration_month, cardData.expiration_year)) {
             addErrorToField($form, 'expiration_month');
@@ -69,7 +69,7 @@
     };
     var completePurchase = function (response) {
         var $form = $('form#purchase');
-        var sensitiveFields = ['card_number', 'expiration_month', 'expiration_year'];
+        var sensitiveFields = ['number', 'expiration_month', 'expiration_year'];
 
         hideProcessing();
         switch (response.status) {
@@ -78,11 +78,11 @@
                 //  IMPORTANT - remove sensitive data to remain PCI compliant
                 removeSensitiveFields($form, sensitiveFields);
                 $form.find('input').removeAttr('disabled');
-                $('<input type="hidden" name="card_uri" value="' + response.data.uri + '">').appendTo($form);
+                $('<input type="hidden" name="card_href" value="' + response.data.href + '">').appendTo($form);
                 $form.unbind('submit', submitPurchase).submit();
                 break;
             case 400:
-                var fields = ['card_number', 'expiration_month', 'expiration_year', 'security_code'];
+                var fields = ['number', 'expiration_month', 'expiration_year', 'cvv'];
                 var found = false;
                 for (var i = 0; i < fields.length; i++) {
                     var isIn = response.error.description.indexOf(fields[i]) >= 0;
@@ -103,7 +103,7 @@
                 showError('We couldn\'t authorize this card, please check your card details and try again');
                 break;
             case 404:
-                console.warn('your marketplace URI is incorrect');
+                console.warn('your marketplace HREF is incorrect');
                 break;
             case 500:
                 console.error('Balanced did something bad, this will never happen, but if it does please retry the request');
@@ -127,9 +127,9 @@
             }
         }
 
-        merchantData.dob = merchantData.date_of_birth_year + '-' + merchantData.date_of_birth_month;
-        delete merchantData.date_of_birth_year;
-        delete merchantData.date_of_birth_month;
+        merchantData.dob = merchantData.dob_year + '-' + merchantData.dob_month;
+        delete merchantData.dob_year;
+        delete merchantData.dob_month;
 
         if (!merchantData.name) {
             addErrorToField($form, 'name');
@@ -139,8 +139,8 @@
             addErrorToField($form, 'email');
         }
 
-        if (!merchantData.street_address) {
-            addErrorToField($form, 'street_address');
+        if (!merchantData.line1) {
+            addErrorToField($form, 'line1');
         }
 
         if (!merchantData.postal_code) {
@@ -181,7 +181,7 @@
             case 201:
                 $form.find('input,select').removeAttr('disabled');
                 showProcessing('Performing identity check...', 66);
-                $('<input type="hidden" name="bank_account_uri" value="' + response.data.uri + '">').appendTo($form);
+                $('<input type="hidden" name="bank_account_href" value="' + response.data.href + '">').appendTo($form);
                 $form.unbind('submit', submitKYC).submit();
             //  todo - what if we have a 409?
         }
@@ -253,7 +253,6 @@
     ctx.rentmybike = {
         init:function (options) {
             _options = options;
-            balanced.init(options.marketplaceUri);
             $('form#purchase').submit(submitPurchase);
             $('form#kyc').submit(submitKYC);
             $('[data-dismiss="alert"]').live('click', function (e) {

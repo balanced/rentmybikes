@@ -24,9 +24,10 @@ class ListingManager(object):
         name = form.name.data
         merchant_data = form.data.copy()
         password = merchant_data.pop('password', None)
-        month = merchant_data.pop('date_of_birth_month')
-        year = merchant_data.pop('date_of_birth_year')
-        merchant_data['dob'] = '{}-{}'.format(year, month)
+        month = merchant_data.pop('dob_month')
+        year = merchant_data.pop('dob_year')
+        merchant_data['dob_month'] = month
+        merchant_data['dob_year'] = year
         merchant_data.pop('listing_id')
         if not merchant_data.get('email', None):
             merchant_data.pop('email', None)
@@ -42,22 +43,21 @@ class ListingManager(object):
             if user.has_password and not user.check_password(password):
                 raise Exception('Password mismatch')
 
-        if not user.account_uri:
+        if not user.account_href:
             self.create_balanced_customer(user, merchant_data=merchant_data)
         else:
             user.add_merchant(merchant_data)
 
-        if bank_account_form.bank_account_uri.data:
-            user.balanced_customer.add_bank_account(
-                bank_account_form.bank_account_uri.data)
-
+        if bank_account_form.bank_account_href.data:
+            bank_account = balanced.BankAccount.fetch(bank_account_form.bank_account_href.data)
+            bank_account.associate_to_customer(user.balanced_customer.href)
         return listing_id
 
     def create_balanced_customer(self, user, merchant_data):
         # user does not yet have a Balanced account, we need to create
         user.create_balanced_customer(merchant_data=merchant_data)
 
-    def _associate_email_and_account(self, email, account_uri):
+    def _associate_email_and_account(self, email, account_href):
         if request.user.is_authenticated:
             user = request.user
         else:
@@ -67,7 +67,7 @@ class ListingManager(object):
             # in.
             Session.flush()
             session['user_guid'] = user.guid
-        user.associate_account_uri(account_uri)
+        user.associate_account_href(account_href)
 
         return user
 
@@ -87,8 +87,8 @@ def index(listing_form=None, guest_listing_form=None,
     listing = Listing.query.get(listing_id)
 
     if (request.user.is_authenticated and
-        request.user.account_uri and
-        request.user.balanced_customer.is_identity_verified):
+        request.user.account_href and
+        request.user.balanced_customer.merchant_status == 'underwritten'):
         # already a merchant, redirect to confirm
         return redirect(url_for('listing.confirm', listing=listing))
 
@@ -145,8 +145,8 @@ def create(**kwargs):
             if 'merchant.postal_code' in ex.description:
                 form['postal_code'].errors.append(ex.description)
                 return index(**kwargs)
-            elif 'merchant.number' in ex.description:
-                form['number'].errors.append(ex.description)
+            elif 'merchant.phone' in ex.description:
+                form['phone'].errors.append(ex.description)
                 return index(**kwargs)
         raise
     except Exception as ex:

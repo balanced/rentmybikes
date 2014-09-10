@@ -90,12 +90,12 @@ def verify():
         return redirect('/')
     email = request.args['email']
     listing_id = request.args['listing_id']
-    merchant_uri = request.args['merchant_uri']
+    merchant_href = request.args['merchant_href']
     marketplace = balanced.Marketplace.my_marketplace
 
     try:
         account = balanced.Customer(
-            email=email, merchant_uri=merchant_uri).save()
+            email=email, merchant_href=merchant_href).save()
     except balanced.exc.HTTPError as ex:
         # shit, that sucked
         if getattr(ex, 'category_code', None) == 'duplicate-email-address':
@@ -105,7 +105,7 @@ def verify():
             raise
     if account:
         user = User.create_guest_user(email=email)
-        user.associate_balanced_customer(account.uri)
+        user.associate_balanced_customer(account.href)
         Session.commit()
         session['email'] = email
     return redirect(url_for('listing.complete', listing=listing_id))

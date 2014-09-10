@@ -43,7 +43,7 @@ class RentMyBike(Flask):
         self.emailer.init_app(self)
 
         balanced.configure(self.config['BALANCED_SECRET'])
-        self.marketplace_uri = balanced.Marketplace.mine.uri
+        self.marketplace_href = balanced.Marketplace.mine.href
 
     def request_context(self, environ):
         ctx = super(RentMyBike, self).request_context(environ)
@@ -58,7 +58,7 @@ class RentMyBike(Flask):
             rv = Response('')
         elif not isinstance(rv, (BaseResponse, Exception)):
             template_name, payload = rv
-            payload['marketplace_uri'] = self.marketplace_uri
+            payload['marketplace_href'] = self.marketplace_href
             rv = render(template_name, request, **payload)
         return super(RentMyBike, self).make_response(rv)
 
@@ -74,7 +74,7 @@ class RentMyBike(Flask):
             account_number='9900000001',
             name='Johann Bernoulli'
         ).save()
-        owner.balanced_customer.add_bank_account(bank_account.uri)
+        bank_account.associate_to_customer(owner.balanced_customer.href)
 
     def add_dummy_data(self):
         user = User(

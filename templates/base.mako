@@ -16,7 +16,7 @@
             <nav>
             % if request.user.is_authenticated:
                 <li>${ request.user.email }</li>
-                % if request.user.account_uri:
+                % if request.user.account_href:
                 <li><a href="${ url_for('transactions.index') }">transaction history</a></li>
                 % endif
                 <li><a href="${ url_for('logout') }">log out</a></li>
@@ -60,16 +60,14 @@
 
 <%def name="jsdefs()">
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://js.balancedpayments.com/v1/balanced.dev.js"></script>
+<script type="text/javascript" src="https://js.balancedpayments.com/1.1/balanced.js"></script>
 <script type="text/javascript" src="/js/base.js"></script>
 <script type="text/javascript">
     var csrf = '${ session.get('_csrf_token') }';
-    var marketplaceUri = '${ marketplace_uri }';
     //  kick everything off when jquery is ready
     $(  document ).ready(function () {
         rentmybike.init({
             csrfToken:csrf,
-            marketplaceUri:marketplaceUri
         });
     });
 </script>

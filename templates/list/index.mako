@@ -16,7 +16,7 @@ ${ utils.bike(listing, hide_button=True) }
                     <a href="${ url_for('login.index', redirect_uri=request.url) }">Sign me in</a>.</p>
                 ${ form(guest_listing_form) }
                 % endif
-                % if not bank_account_form.bank_account_uri.data:
+                % if not bank_account_form.bank_account_href.data:
                 <fieldset>
                     <legend>Add your bank account <span>(optional)</span></legend>
                     ${ utils.render_field(bank_account_form.account_number) }
@@ -42,14 +42,14 @@ ${ utils.render_field(form.email, class_='span5') }
 % if hasattr(form, 'password'):
 ${ utils.render_field(form.password, class_='span5') }
 % endif
-${ utils.render_field(form.street_address, class_='span5') }
+${ utils.render_field(form.line1, class_='span5') }
 ${ utils.render_field(form.postal_code, class_='span2') }
 ${ utils.render_field(form.state) }
 ${ utils.render_field(form.country_code) }
 ${ utils.render_field(form.phone, class_='span4') }
 <div class="control-group">
-    <label for="date_of_birth_month">Date of Birth</label>
-    ${ form.date_of_birth_month(class_='span1') }
-    ${ form.date_of_birth_year(class_='span1') }
+    <label for="dob_month">Date of Birth</label>
+    ${ form.dob_month(class_='span1') }
+    ${ form.dob_year(class_='span1') }
 </div>
 </%def>

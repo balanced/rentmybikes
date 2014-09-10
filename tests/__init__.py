@@ -75,6 +75,19 @@ class SystemTestCase(ControllerTestCase):
         resp = self.client.post('/accounts/new', data=user_payload)
         self.assertEqual(resp.status_code, 302)
 
+    def _create_underwritten_user(self, email):
+        user_payload = {
+            '_csrf_token': self.get_csrf_token(),
+            'account-email': email,
+            'account-password': 'ab',
+            "account-name": "Henry Ford",
+            "account-dob_month": 07,
+            "account-dob_year": 1985,
+            "account-postal_code": "48120"
+        }
+        resp = self.client.post('/accounts/new', data=user_payload)
+        self.assertEqual(resp.status_code, 302)
+
     def _guest_listing_payload(self, email):
         return {
             '_csrf_token': self.get_csrf_token(),
@@ -82,11 +95,11 @@ class SystemTestCase(ControllerTestCase):
             'guest-listing_id': 1,
             'guest-name': 'Krusty the Klown',
             'guest-email': email,
-            'guest-street_address': '801 High St',
+            'guest-line1': '801 High St',
             'guest-postal_code': '94301',
             'guest-country_code': 'USA',
-            'guest-date_of_birth_month': 5,
-            'guest-date_of_birth_year': 1956,
+            'guest-dob_month': 5,
+            'guest-dob_year': 1956,
             'guest-phone': '9046281796',
             'guest-password': 'ab',
             }
@@ -102,11 +115,11 @@ class SystemTestCase(ControllerTestCase):
             '_csrf_token': self.get_csrf_token(),
             'listing-type': 'person',
             'listing-listing_id': 1,
-            'listing-street_address': '801 High St',
+            'listing-line1': '801 High St',
             'listing-postal_code': '94301',
             'listing-country_code': 'USA',
-            'listing-date_of_birth_month': 5,
-            'listing-date_of_birth_year': 1956,
+            'listing-dob_month': 5,
+            'listing-dob_year': 1956,
             'listing-phone': '9046281796',
             }
 
@@ -117,8 +130,7 @@ class SystemTestCase(ControllerTestCase):
         return payload
 
     def _merchant_payload(self, email):
-        return merchant.balanced_merchant_payload(email)
-
+        return merchant.balanced_customer_payload(email)
 
 def email_generator():
     while True:
