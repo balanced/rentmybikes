@@ -3,6 +3,7 @@ import logging
 
 import balanced
 from sqlalchemy.orm import relationship, backref
+from random import randint
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.security import generate_password_hash, check_password_hash
 from rentmybike.db import Session
@@ -31,9 +32,9 @@ class User(Base):
         self.password_hash = generate_password_hash(password)
 
     @staticmethod
-    def login(email_address, password):
+    def login(email, password):
         try:
-            user = User.query.filter(User.email_address == email_address).one()
+            user = User.query.filter(User.email == email).one()
         except NoResultFound:
             pass
         else:
@@ -48,18 +49,18 @@ class User(Base):
         return True if self.has_password else False
 
     @property
-    def balanced_account(self):
+    def balanced_customer(self):
         if self.account_uri:
-            return balanced.Account.find(self.account_uri)
+            return balanced.Customer.find(self.account_uri)
 
     @staticmethod
-    def create_guest_user(email_address, name=None, password=None):
+    def create_guest_user(email, name=None, password=None):
         try:
             user = User.query.filter(
-                User.email_address == email_address).one()
+                User.email == email).one()
         except NoResultFound:
             Session.flush()
-            user = User(email_address=email_address, name=name,
+            user = User(email=email, name=name,
                 password=password)
             Session.add(user)
             try:
@@ -71,7 +72,7 @@ class User(Base):
                 Session.commit()
         return user
 
-    def create_balanced_account(self, card_uri=None,
+    def create_balanced_customer(self, card_uri=None,
                                 merchant_data=None):
         if self.account_uri:
             raise Exception('User already has a balanced account')
@@ -79,67 +80,50 @@ class User(Base):
             account = self._create_balanced_buyer(card_uri)
         else:
             account = self._create_balanced_merchant(merchant_data)
-        self.associate_balanced_account(account.uri)
+        self.associate_balanced_customer(account.uri)
+        if merchant_data:
+            self.add_merchant(merchant_data)
         return account
 
     def _create_balanced_buyer(self, card_uri):
         marketplace = balanced.Marketplace.my_marketplace
-        try:
-            account = marketplace.create_buyer(self.email_address,
-                name=self.name, card_uri=card_uri)
-        except balanced.exc.HTTPError as ex:
-            # if 500 then this attribute is not set...
-            if getattr(ex, 'category_code', None) == 'duplicate-email-address':
-                # account already exists, let's upsert
-                account = marketplace.accounts.filter(
-                    email_address=self.email_address).one()
-                account.add_card(card_uri)
-            else:
-                raise
+        account = balanced.Customer(email=self.email,
+            name=self.name, card_uri=card_uri)
+        account.save()
         return account
 
     def _create_balanced_merchant(self, merchant_data):
         marketplace = balanced.Marketplace.my_marketplace
         try:
-            account = marketplace.create_merchant(self.email_address,
-                name=self.name, merchant=merchant_data)
-        except balanced.exc.HTTPError as ex:
-            if getattr(ex, 'category_code', None) == 'duplicate-email-address':
-                # account already exists, let's upsert
-                account = marketplace.accounts.filter(
-                    email_address=self.email_address).one()
-                if 'merchant' in account.roles:
-                    merchant_data.pop('dob')
-                    merchant_data.pop('state')
-                account.add_merchant(merchant_data)
-            else:
-                raise
+            account = balanced.Customer.query.filter(email=self.email).one()
+        except balanced.exc.NoResultFound as ex:
+            account = balanced.Customer(email=self.email, name=self.name, merchant=merchant_data).save()
         return account
 
-    def lookup_balanced_account(self):
+    def lookup_balanced_customer(self):
         if self.account_uri:
             return
         try:
-            account = balanced.Account.query.filter(
-                email_address=self.email_address).one()
+            account = balanced.Customer.query.filter(
+                email=self.email).one()
         except balanced.exc.NoResultFound:
             pass
         else:
             self.account_uri = account.uri
 
-    def associate_balanced_account(self, account_uri=None):
+    def associate_balanced_customer(self, account_uri=None):
         """
         Assign a Balanced account_uri to a user. This will check that the
         email addresses within balanced and our local system match first. It
         will also fail if the local user already has an account assigned.
         """
         if account_uri:
-            balanced_email_address = balanced.Account.find(
-                account_uri).email_address
+            balanced_email = balanced.Customer.find(
+                account_uri).email
         else:
-            balanced_email_address = balanced.Account.filter(
-                email_address=self.email_address).one()
-        if balanced_email_address != self.email_address:
+            balanced_email = balanced.Customer.filter(
+                email=self.email).one()
+        if balanced_email != self.email:
             # someone is trying to claim an account that doesn't belong to them
             raise Exception('Email address mismatch.')
         if self.account_uri and self.account_uri != account_uri:
@@ -152,18 +136,29 @@ class User(Base):
         Adds a card to an account within Balanced.
         """
         try:
-            account = balanced.Account.query.filter(
-                email_address=self.email_address).one()
+            account = balanced.Customer.query.filter(email=self.email).one()
         except balanced.exc.NoResultFound:
-            account = balanced.Marketplace.create_buyer(
-                email_address=self.email_address, card_uri=card_uri,
-                name=self.name)
+            account = balanced.Customer(
+                email=self.email, card_uri=card_uri,
+                name=self.name).save()
         else:
             account.add_card(card_uri)
         return account
 
     def add_merchant(self, merchant_data):
-        if 'merchant' in self.balanced_account.roles:
-            merchant_data.pop('dob')
-            merchant_data.pop('state')
-        self.balanced_account.add_merchant(merchant_data)
+        address_fields = ['city', 'line1', 'line2', 'state', 'postal_code',
+                          'country_code']
+        customer_resource = self.balanced_customer
+        for field in merchant_data:
+            if field in address_fields:
+                customer_resource.address[field] = merchant_data[field]
+            else:
+                setattr(customer_resource, field, merchant_data[field])
+        customer_resource.save()
+
+    @classmethod
+    def fetch_one_at_random(cls):
+        user_query = User.query.filter()
+        selector = randint(0, (user_query.count()-1))
+        owner = user_query[selector]
+        return owner

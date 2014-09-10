@@ -4,6 +4,8 @@ import sys
 import traceback
 
 import balanced
+import string
+import random
 from flask import Flask, request, Response, session
 from flaskext.mail import Mail
 from sqlalchemy.exc import InterfaceError
@@ -14,6 +16,7 @@ from rentmybike.db import Session
 from rentmybike.models import User, Listing
 from rentmybike.request import Request
 from rentmybike.response import render
+from sqlalchemy.orm.exc import NoResultFound
 
 
 logger = logging.getLogger(__name__)
@@ -59,17 +62,34 @@ class RentMyBike(Flask):
             rv = render(template_name, request, **payload)
         return super(RentMyBike, self).make_response(rv)
 
+    def dummy_email_generator(
+            self, size=6, chars=string.ascii_letters + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size)) + \
+               '@gmail.com'
+
+    def dummy_bank_account_generator(self, owner):
+        bank_account = balanced.BankAccount(
+            routing_number='121000358',
+            account_type='checking',
+            account_number='9900000001',
+            name='Johann Bernoulli'
+        ).save()
+        owner.balanced_customer.add_bank_account(bank_account.uri)
+
     def add_dummy_data(self):
-        for name, email, password in config['DEFAULT_USERS']:
-            user = User.query.filter(User.email_address == email).count()
-            if not user:
-                user = User(name=name, email_address=email, password=password)
-                Session.add(user)
+        user = User(
+            name='Dummy User', email=self.dummy_email_generator(),
+            password='password')
+        Session.add(user)
+        user.create_balanced_customer()
 
         for i in range(4):
+            owner = User.fetch_one_at_random()
+            if not user.balanced_customer.bank_accounts.count():
+                self.dummy_bank_account_generator(owner)
             listing = Listing.query.filter(Listing.id == i + 1).count()
             if not listing:
-                listing = Listing(id=i + 1)
+                listing = Listing(id=i + 1, owner_guid=owner.guid)
                 Session.add(listing)
 
         Session.commit()

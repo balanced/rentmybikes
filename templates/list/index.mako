@@ -21,8 +21,8 @@ ${ utils.bike(listing, hide_button=True) }
                     <legend>Add your bank account <span>(optional)</span></legend>
                     ${ utils.render_field(bank_account_form.account_number) }
                     <div class="control-group">
-                        ${ bank_account_form.bank_code.label }
-                        ${ bank_account_form.bank_code } <span id="bank-code-result"></span>
+                        ${ bank_account_form.routing_number.label }
+                        ${ bank_account_form.routing_number } <span id="bank-code-result"></span>
                     </div>
                 </fieldset>
                 % endif
@@ -38,7 +38,7 @@ ${ utils.bike(listing, hide_button=True) }
 ${ utils.render_field(form.type) }
 ${ utils.render_field(form.listing_id) }
 ${ utils.render_field(form.name, class_='span5', autofocus="autofocus") }
-${ utils.render_field(form.email_address, class_='span5') }
+${ utils.render_field(form.email, class_='span5') }
 % if hasattr(form, 'password'):
 ${ utils.render_field(form.password, class_='span5') }
 % endif
@@ -46,7 +46,7 @@ ${ utils.render_field(form.street_address, class_='span5') }
 ${ utils.render_field(form.postal_code, class_='span2') }
 ${ utils.render_field(form.state) }
 ${ utils.render_field(form.country_code) }
-${ utils.render_field(form.phone_number, class_='span4') }
+${ utils.render_field(form.phone, class_='span4') }
 <div class="control-group">
     <label for="date_of_birth_month">Date of Birth</label>
     ${ form.date_of_birth_month(class_='span1') }

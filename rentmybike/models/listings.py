@@ -3,6 +3,7 @@ import logging
 
 from sqlalchemy.orm.exc import NoResultFound
 
+import balanced
 from rentmybike.db import Session
 from rentmybike.db.tables import listings, rentals
 from rentmybike.models import Base, User
@@ -16,20 +17,44 @@ class Listing(Base):
     __table__ = listings
 
     def rent_to(self, user, card_uri=None):
+        # Fetch the buyer
+        buyer = user.balanced_customer
 
-        account = user.balanced_account
-
-        if not card_uri:
-            if not account.cards.count():
+        # Fetch the buyers card uri that you would like to debit
+        if card_uri:
+            card = balanced.Card.find(card_uri)
+        else:
+            if not buyer.cards.count():
                 raise Exception('No card on file')
             if not user.has_password:
                 raise Exception('Anonymous users must specify a card')
+            else:
+                card = buyer.source
 
-        # this will throw balanced.exc.HTTPError if it fails
-        debit = account.hold(self.price * 100, source_uri=card_uri)
+        # Fetch the merchant
+        owner_user = User.query.get(self.owner_guid)
+        owner = owner_user.balanced_customer
 
-        rental = Rental(buyer_guid=user.guid,
-            debit_uri=debit.uri, bike_guid=self.id)
+        debit = balanced.Hold(
+            source_uri=card.uri,
+            amount=self.price * 100,
+        )
+        debit.save()
+
+        rental = Rental(buyer_guid=user.guid, debit_uri=debit.uri,
+                        listing_guid=self.id, owner_guid=owner_user.guid)
+
+        # since this is an example, we're showing how to issue a credit
+        # immediately. normally you should wait for order fulfillment
+        # before crediting.
+        # First, fetch the onwer's bank account to credit
+        bank_accounts = owner.bank_accounts
+        if not bank_accounts.count():
+            raise Exception('No bank account on file')
+        else:
+            bank_account = bank_accounts[0]
+
+        credit = bank_account.credit(amount=(self.price * 100))
 
         Session.add(rental)
         return rental
@@ -93,4 +118,4 @@ class Rental(Base):
 
     @property
     def bike(self):
-        return Listing.query.get(self.bike_guid)
+        return Listing.query.get(self.listing_guid)

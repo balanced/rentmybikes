@@ -39,7 +39,7 @@ ${ utils.bike(listing) }
             kwargs['autofocus'] = 'autofocus'
     %>
     ${ utils.render_field(form.name, class_='span5', **kwargs) }
-    ${ utils.render_field(form.email_address, class_='span5') }
+    ${ utils.render_field(form.email, class_='span5') }
     <%
         kwargs = {}
         if not is_guest:
