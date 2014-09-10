@@ -123,6 +123,7 @@ def update(listing, **kwargs):
         raise
     else:
         Session.commit()
+
         email.send_email(rental.buyer.email,
             'Rental Receipt',
             'receipt.mako',
@@ -137,7 +138,6 @@ def update(listing, **kwargs):
 
 @route('/rent/<listing:listing>/confirmed/<rental:rental>', 'rent.confirmed')
 def show_confirmed(listing, rental):
-
     if rental.buyer_guid != session['rental_user_guid']:
         raise NotFound()
     email = session['rental_email']

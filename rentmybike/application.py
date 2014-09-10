@@ -10,8 +10,6 @@ from flask import Flask, request, Response, session
 from flaskext.mail import Mail
 from sqlalchemy.exc import InterfaceError
 from werkzeug.wrappers import BaseResponse
-from sqlalchemy.orm.exc import NoResultFound
-
 
 from rentmybike import config
 from rentmybike.db import Session

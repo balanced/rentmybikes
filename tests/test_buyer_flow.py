@@ -153,6 +153,7 @@ class TestBuyerFlow(SystemTestCase):
         email = email_generator.next()
         payload = self._guest_rental_payload(email)
         self._populate_data()
+        
         manager = rentalmanager.return_value
 
         http_mock = mock.Mock()
