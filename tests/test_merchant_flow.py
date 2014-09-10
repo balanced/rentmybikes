@@ -112,7 +112,6 @@ class TestMerchantFlow(SystemTestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIsNotNone(re.search(r'/list/\d+/confirm', resp.data))
 
-
     def test_anonymous_listing_with_existing_merchant_account(self):
         email = email_generator.next()
         ogaccount = balanced.Customer(

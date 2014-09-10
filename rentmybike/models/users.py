@@ -57,7 +57,8 @@ class User(Base):
     @staticmethod
     def create_guest_user(email, name=None, password=None):
         try:
-            user = User.query.filter(User.email == email).one()
+            user = User.query.filter(
+                User.email == email).one()
         except NoResultFound:
             Session.flush()
             user = User(email=email, name=name,

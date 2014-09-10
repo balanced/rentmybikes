@@ -31,7 +31,6 @@ class Listing(Base):
             else:
                 card = buyer.cards.first()
 
-
         # Fetch the merchant
         owner_user = User.query.get(self.owner_guid)
         owner = owner_user.balanced_customer

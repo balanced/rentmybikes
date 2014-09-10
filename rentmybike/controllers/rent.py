@@ -140,7 +140,6 @@ def show_confirmed(listing, rental):
 
     if rental.buyer_guid != session['rental_user_guid']:
         raise NotFound()
-
     email = session['rental_email']
     charge = balanced.Debit.fetch(rental.debit_href)
     return 'rent/complete.mako', {

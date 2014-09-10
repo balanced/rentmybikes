@@ -132,7 +132,6 @@ class SystemTestCase(ControllerTestCase):
     def _merchant_payload(self, email):
         return merchant.balanced_customer_payload(email)
 
-
 def email_generator():
     while True:
         yield '{}@balancedpayments.com'.format(uuid.uuid4())

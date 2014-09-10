@@ -118,7 +118,6 @@ class TestBuyerFlow(SystemTestCase):
         payload = self._rental_payload()
         self._populate_data()
         self._rent(payload)
-
         self._verify_buyer_transactions(email)
 
     def test_authenticated_purchase_repeat(self, *_, **kwargs):

@@ -18,6 +18,7 @@ from rentmybike.db import Session
 from rentmybike.models import User, Listing
 from rentmybike.request import Request
 from rentmybike.response import render
+from sqlalchemy.orm.exc import NoResultFound
 
 
 logger = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ class RentMyBike(Flask):
             account_number='9900000001',
             name='Johann Bernoulli'
         ).save()
-        bank_account.associate_to_customer(owner.balanced_customer  .href)
+        bank_account.associate_to_customer(owner.balanced_customer.href)
 
     def add_dummy_data(self):
         user = User(
