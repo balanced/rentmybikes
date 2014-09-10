@@ -36,12 +36,8 @@ class Listing(Base):
         owner_user = User.query.get(self.owner_guid)
         owner = owner_user.balanced_customer
 
-        # create an Order
-        order = owner.create_order(desciption=self.bike_type)
-
         # debit the buyer for the amount of the listing
-        debit = order.debit_from(
-            source=card,
+        debit = card.debit(
             amount=(self.price * 100),
             appears_on_statement_as=self.bike_type,
         )
@@ -56,12 +52,11 @@ class Listing(Base):
         if not bank_account:
             raise Exception('No bank account on file')
 
-        order.credit_to(
-            destination=bank_account,
-            amount=(self.price * 100),
+        bank_account.credit(
+            amount=(self.price * 100)
         )
 
-        rental = Rental(buyer_guid=user.guid, order_href=order.href,
+        rental = Rental(buyer_guid=user.guid, debit_href=debit.href,
                         listing_guid=self.id, owner_guid=owner_user.guid)
 
         Session.add(rental)

@@ -149,7 +149,7 @@ class TestBuyerFlow(SystemTestCase):
         self.test_authenticated_purchase(email)
 
     @mock.patch('rentmybike.controllers.rent.RentalManager')
-    @mock.patch('rentmybike.controllers.rent.balanced.Order.fetch')
+    @mock.patch('rentmybike.controllers.rent.balanced.Debit.fetch')
     def test_failure_and_then_success(self, fetch, rentalmanager, *_):
         email = email_generator.next()
         payload = self._guest_rental_payload(email)
