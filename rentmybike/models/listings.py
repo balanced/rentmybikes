@@ -35,8 +35,12 @@ class Listing(Base):
         owner_user = User.query.get(self.owner_guid)
         owner = owner_user.balanced_customer
 
+        # create an Order
+        order = owner.create_order(desciption=self.bike_type)
+
         # debit the buyer for the amount of the listing
-        debit = card.debit(
+        debit = order.debit_from(
+            source=card,
             amount=(self.price * 100),
             appears_on_statement_as=self.bike_type,
         )
@@ -55,7 +59,12 @@ class Listing(Base):
             amount=(self.price * 100)
         )
 
-        rental = Rental(buyer_guid=user.guid, debit_href=debit.href,
+        order.credit_to(
+            destination=bank_account,
+            amount=(self.price * 100),
+        )
+
+        rental = Rental(buyer_guid=user.guid, order_href=order.href,
                         listing_guid=self.id, owner_guid=owner_user.guid)
 
         Session.add(rental)
