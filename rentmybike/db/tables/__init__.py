@@ -55,7 +55,6 @@ rentals = Table('rentals', metadata,
         nullable=False),
     Column('listing_guid', Unicode),
     Column('debit_uri', Unicode),
-    # no foreign keys, we're going ghetto style!
     Column('owner_guid', Unicode),
     Column('buyer_guid', Unicode),
 )
