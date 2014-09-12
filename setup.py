@@ -43,10 +43,10 @@ def parse_dependency_links(file_name):
 PATH_TO_FILE = os.path.dirname(__file__)
 
 setup(
-    name='rentmyboke',
+    name='rentmybike',
     license='BSD',
     author='Balanced',
-    author_email='dev@balancedpayments.com',
+    author_email='dev+rentmybike@balancedpayments.com',
     description='Rent My Bike Marketplace',
     packages=['rentmybike'],
     test_suite='nose.collector',
