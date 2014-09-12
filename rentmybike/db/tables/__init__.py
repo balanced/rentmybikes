@@ -57,5 +57,4 @@ rentals = Table('rentals', metadata,
     Column('debit_href', Unicode),
     Column('owner_guid', Unicode),
     Column('buyer_guid', Unicode),
-    Column('debit_href', Unicode),
 )
