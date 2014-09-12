@@ -29,7 +29,7 @@ DOMAIN_URI = 'http://www.example.com'
 
 BALANCED_SECRET = '6289680a886c11e2a44a026ba7cd33d0'
 
-DB_URI = 'postgresql://rentmybike@localhost/rentmybike'
+DB_URI = 'postgresql://postgres@localhost/rentmybike'
 DB_DEBUG = False
 
 MAIL_DEBUG = True

@@ -7,7 +7,7 @@ install:
   - pip install -r requirements.txt
   - pip install -r test-requirements.txt
 before_script:
-  - psql -c 'create database rentmybike;' -U rentmybike
+  - psql -c 'create database rentmybike;' -U postgres
 script:
   - alembic upgrade head
   - nosetests
