@@ -13,3 +13,4 @@ decorator==3.3.3
 iso8601==0.1.4
 wsgiref==0.1.2
 psycopg2==2.4.5
+alembic

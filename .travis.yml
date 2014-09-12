@@ -1,8 +1,13 @@
 language: python
 python:
   - 2.7
+addons:
+  postgresql: "9.3"
 install:
   - pip install -r requirements.txt
   - pip install -r test-requirements.txt
+before_script:
+  - psql -c 'create database rentmybike;' -U rentmybike
 script:
+  - alembic upgrade head
   - nosetests
